@@ -1,0 +1,754 @@
+# smath.py - 数学工具模块
+
+pi = 3.141592653589793
+e = 2.718281828459045
+tau = 2 * pi
+phi = 1.618033988749895
+
+EPSILON = 1e-18
+INF = float('inf')
+
+
+def gcd(a, b):
+    """最大公约数"""
+    a, b = abs(a), abs(b)
+    while b:
+        a, b = b, a % b
+    return a
+
+def log_fast(n, base=10):
+    if n <= 0: return -float('inf')
+    k = 1
+    while True:
+        try:
+            if base ** k > n:
+                break
+            k *= 2
+        except:
+            break
+
+    low, high = k // 2, k
+    while low <= high:
+        mid = (low + high) // 2
+        if base ** mid <= n:
+            low = mid + 1
+        else:
+            high = mid - 1
+
+    return high
+
+def lcm(a, b):
+    """最小公倍数"""
+    return abs(a * b) // gcd(a, b)
+
+
+def factorial(n):
+    """阶乘 n!"""
+    if isinstance(n, int) or abs(n - int(n)) <= EPSILON:
+        
+        if n < 0:
+            raise ValueError("阶乘不支持负整数")
+        if n <= 1:
+            return 1
+        result = 1
+        for i in range(2, n + 1):
+            result *= i
+        return result
+    return gamma(n + 1)
+
+
+def comb(n, k):
+    """组合数 C(n,k)"""
+    if k < 0 or k > n:
+        return 0
+    k = min(k, n - k)
+    result = 1
+    for i in range(1, k + 1):
+        result = result * (n - k + i) // i
+    return result
+
+
+def perm(n, k):
+    """排列数 P(n,k)"""
+    return comb(n, k) * factorial(k)
+
+
+def _exp(x, terms=20):
+    """e^x 泰勒展开 - 快速收敛"""
+    # 负数转正数（利用 e^-x = 1/e^x）
+    if x < 0:
+        return 1.0 / _exp(-x, terms)
+    
+    # 小数优化：e^(a+b) = e^a * e^b，让 x 在 [0, 1] 范围内
+    integer_part = int(x)
+    fractional_part = x - integer_part
+    
+    # 泰勒展开小数部分
+    result = 1.0
+    term = 1.0
+    for i in range(1, terms + 1):
+        term *= fractional_part / i
+        result += term
+        if abs(term) < EPSILON:
+            break
+    
+    # 整数部分用乘法（e^整数 = e^1 累乘）
+    e_pow_int = result  # 已经是 e^fractional_part
+    e1 = 2.718281828459045  # e 的近似值
+    
+    for _ in range(integer_part):
+        e_pow_int *= e1
+    
+    return e_pow_int
+
+
+def _ln(x):
+    """自然对数 ln(x)，使用 arctanh 展开，支持范围缩小"""
+    if x <= 0:
+        raise ValueError("ln(x) 定义域为 x > 0")
+
+    if x < 1:
+        return -_ln(1/x)
+    exponent = 0
+    while x > 2:
+        x /= 2
+        exponent += 1
+
+    y = (x - 1) / (x + 1)
+
+    result = 0
+    y_pow = y
+    for i in range(1, 40, 2):
+        result += y_pow / i
+        y_pow *= y * y
+        if y_pow / (i + 2) < EPSILON:
+            break
+
+    result *= 2
+    return result + exponent * 0.6931471805599453
+
+def _lanczos_coefficients(g=7):
+    """Lanczos 近似系数（g=7，精度约 1e-7）"""
+    # 参考：Numerical Recipes
+    return [
+        0.99999999999980993,
+        676.5203681218851,
+        -1259.1392167224028,
+        771.32342877765313,
+        -176.61502916214059,
+        12.507343278686905,
+        -0.13857109526572012,
+        9.9843695780195716e-6,
+        1.5056327351493116e-7
+    ]
+def gamma(z):
+    """ Gamma 函数 Γ(z)"""
+    # 检查负整数（极点）
+    if isinstance(z, (int, float)) and not isinstance(z, complex):
+        if z <= 0 and z == int(z):
+            raise ValueError(f"Gamma({z}) 无定义（负整数极点）")
+    
+    if z < 0.5:
+        return pi / (sin(pi * z) * gamma(1 - z))
+    
+    coeffs = _lanczos_coefficients()
+    g = 7
+    
+    sum_p = coeffs[0]
+    for i in range(1, g + 2):
+        sum_p += coeffs[i] / (z + i - 1)
+    
+    t = z + g - 0.5
+    return sqrt(2 * pi) * (t ** (z - 0.5)) * exp(-t) * sum_p
+
+
+def log_gamma(z):
+    """对数 Gamma 函数 ln(|Γ(z)|)"""
+    return ln(abs(gamma(z)))
+
+
+def digamma(z):
+    """近似公式，适用于实数 z > 0"""
+    if z <= 0:
+        # 用反射公式：ψ(1-z) = ψ(z) + π cot(πz)
+        return digamma(1 - z) - pi / tan(pi * z)
+    
+    # 渐近展开（z 较大时）
+    if z > 8:
+        inv_z = 1 / z
+        inv_z2 = inv_z * inv_z
+        inv_z4 = inv_z2 * inv_z2
+        return ln(z) - 0.5 / z - inv_z2 / 12 + inv_z4 / 120 - inv_z4 * inv_z2 / 252
+    
+    return digamma(z + 1) - 1 / z
+
+
+def beta(a, b):
+    """Beta 函数 B(a,b) = Γ(a)Γ(b)/Γ(a+b)"""
+    return gamma(a) * gamma(b) / gamma(a + b)
+
+def _log_complex(z):
+    """复数自然对数 ln(z)"""
+    if not isinstance(z, complex):
+        if z == float('inf'):
+            return float('inf')
+        if z == float('-inf'):
+            return float('-inf')
+        if z > 0:
+            result = 0
+            while z > e:
+                z /= e
+                result += 1
+            return _ln(z) + result
+
+    # 模长
+    r = (z.real**2 + z.imag**2) ** 0.5
+    if r == 0:
+        return float("-inf")
+
+    # 辐角 atan2(y, x)
+    theta = _atan2(z.imag, z.real)
+    result = complex(_ln(r), theta)
+    if abs(result.imag) < EPSILON:  # 浮点数精度阈值
+        return result.real
+    return result
+
+
+def _atan2(y, x):
+    """辐角函数 atan2(y, x)"""
+    if x > 0:
+        return _atan(y / x)
+    elif x < 0:
+        if y >= 0:
+            return _atan(y / x) + pi
+        else:
+            return _atan(y / x) - pi
+    else:
+        if y > 0:
+            return pi / 2
+        elif y < 0:
+            return -pi / 2
+        else:
+            return 0.0
+
+
+
+def _atan(x, terms=40):
+    sign = 1 if x >= 0 else -1
+    x = abs(x)
+
+    # 大 x 时用互补角公式
+    if x > 1:
+        return sign * (pi / 2 - _atan(1 / x, terms))
+
+    t = x / (1 + (1 + x * x) ** 0.5)
+    t2 = t * t
+    term = t
+    result = 0
+    n = 1
+
+    for _ in range(terms):
+        result += term / n
+        term *= -t2
+        n += 2
+        if abs(term / n) < EPSILON:
+            break
+
+    return sign * 2 * result
+
+
+def log(z, base=None):
+    """任意底数的对数"""
+    if base is None:
+        return _log_complex(z)
+    ln_z = _log_complex(z)
+    ln_base = _log_complex(base)
+    if isinstance(ln_z, complex) or isinstance(ln_base, complex):
+        return ln_z / ln_base
+    return ln_z / ln_base
+
+def exp(z):
+    return _exp(z)
+
+def log10(z):
+    """以 10 为底的对数"""
+    return log(z, 10)
+
+
+def log2(z):
+    """以 2 为底的对数"""
+    return log(z, 2)
+
+
+def ln(z):
+    """自然对数"""      
+    return _log_complex(z)
+
+
+def cos(x):
+    """余弦函数"""
+    if isinstance(x, complex):
+        ix = complex(-x.imag, x.real)
+        return (_exp(ix) + _exp(-ix)) / 2
+
+    x = x % (2 * pi)
+    x2 = x * x
+    result = 1.0
+    term = 1.0
+    for n in range(1, 70):
+        term *= -x2 / ((2 * n - 1) * (2 * n))
+        result += term
+        if abs(term) < EPSILON:
+            break
+    return result
+
+
+def sin(x):
+    """正弦函数"""
+    if isinstance(x, complex):
+        ix = complex(-x.imag, x.real)
+        return (_exp(ix) - _exp(-ix)) / complex(0, 2)
+
+    x = x % (2 * pi)
+    x2 = x * x
+    result = 0.0
+    term = x
+    for n in range(70):
+        result += term
+        term *= -x2 / ((2 * n + 2) * (2 * n + 3))
+        if abs(term) < EPSILON:
+            break
+    return result
+
+
+def tan(x):
+    """正切函数"""
+    c = cos(x)
+    if abs(c) < EPSILON:
+        raise ValueError("tan(x) 在 x = {:.6f} 处无定义".format(x))
+    return sin(x) / c
+
+
+def cot(x):
+    """余切函数"""
+    s = sin(x)
+    if abs(s) < EPSILON:
+        raise ValueError("cot(x) 在 x = {:.6f} 处无定义".format(x))
+    return cos(x) / s
+
+
+def sec(x):
+    """正割函数"""
+    c = cos(x)
+    if abs(c) < EPSILON:
+        raise ValueError("sec(x) 在 x = {:.6f} 处无定义".format(x))
+    return 1.0 / c
+
+
+def csc(x):
+    """余割函数"""
+    s = sin(x)
+    if abs(s) < EPSILON:
+        raise ValueError("csc(x) 在 x = {:.6f} 处无定义".format(x))
+    return 1.0 / s
+
+
+def asin(x):
+    """反正弦函数"""
+    if isinstance(x, complex):
+        return complex(0, -1) * _log_complex(complex(0, 1) * x + (1 - x * x) ** 0.5)
+    if abs(x) > 1:
+        return complex(0, -1) * _log_complex(complex(0, 1) * x + (1 - x * x) ** 0.5)
+    if x == 1:
+        return pi / 2
+    if x == -1:
+        return -pi / 2
+    return _atan(x / (1 - x * x) ** 0.5)
+
+
+def acos(x):
+    """反余弦函数"""
+    if isinstance(x, complex):
+        return complex(0, -1) * _log_complex(x + complex(0, 1) * (1 - x * x) ** 0.5)
+    if abs(x) > 1:
+        return complex(0, -1) * _log_complex(x + complex(0, 1) * (1 - x * x) ** 0.5)
+    return pi / 2 - asin(x)
+
+
+def atan(x):
+    """反正切函数"""
+    if isinstance(x, complex):
+        return (complex(0, 1) / 2) * _log_complex((complex(0, 1) + x) / (complex(0, 1) - x))
+    return _atan(x)
+
+
+def atan2(y, x):
+    """双参数反正切"""
+    if isinstance(y, complex) or isinstance(x, complex):
+        raise ValueError("atan2 不支持复数")
+    return _atan2(y, x)
+
+
+def cosh(x):
+    """双曲余弦"""
+    return (_exp(x) + _exp(-x)) / 2
+
+
+def sinh(x):
+    """双曲正弦"""
+    return (_exp(x) - _exp(-x)) / 2
+
+
+def tanh(x):
+    """双曲正切"""
+    return sinh(x) / cosh(x)
+
+
+def coth(x):
+    """双曲余切"""
+    return cosh(x) / sinh(x)
+
+
+def acosh(x):
+    """反双曲余弦"""
+    if x < 1:
+        raise ValueError("acosh(x) 定义域为 x >= 1")
+    return _ln(x + (x * x - 1) ** 0.5)
+
+
+def asinh(x):
+    """反双曲正弦"""
+    return _ln(x + (x * x + 1) ** 0.5)
+
+
+def atanh(x):
+    """反双曲正切"""
+    if abs(x) >= 1:
+        raise ValueError("atanh(x) 定义域为 |x| < 1")
+    return 0.5 * _ln((1 + x) / (1 - x))
+
+def sinc(x):
+    """辛格函数 sin(x)/x，信号处理常用"""
+    if abs(x) < EPSILON:
+        return 1.0
+    return sin(x) / x
+
+
+def versin(x):
+    """正矢函数 1 - cos(x)"""
+    return 1 - cos(x)
+
+
+def coversin(x):
+    """余矢函数 1 - sin(x)"""
+    return 1 - sin(x)
+
+
+def exsec(x):
+    """外正割函数 sec(x) - 1"""
+    return sec(x) - 1
+
+
+def excsc(x):
+    """外余割函数 csc(x) - 1"""
+    return csc(x) - 1
+
+
+def hav(x):
+    """半正矢函数 (1 - cos(x)) / 2"""
+    return (1 - cos(x)) / 2
+
+
+def archav(x):
+    """反半正矢函数"""
+    return 2 * asin(sqrt(x))
+
+
+def gudermannian(x):
+    """古德曼函数 gd(x) = 2*atan(tanh(x/2))"""
+    return 2 * atan(tanh(x / 2))
+
+
+def inv_gudermannian(x):
+    """反古德曼函数"""
+    return log(tan(pi/4 + x/2))
+
+
+def sech(x):
+    """双曲正割 1/cosh(x)"""
+    return 1 / cosh(x)
+
+
+def csch(x):
+    """双曲余割 1/sinh(x)"""
+    if abs(x) < EPSILON:
+        raise ValueError("csch(x) 在 x=0 处无定义")
+    return 1 / sinh(x)
+
+
+def acoth(x):
+    """反双曲余切"""
+    if abs(x) <= 1:
+        raise ValueError("acoth(x) 定义域为 |x| > 1")
+    return 0.5 * log((x + 1) / (x - 1))
+
+
+def asech(x):
+    """反双曲正割"""
+    if not 0 < x <= 1:
+        raise ValueError("asech(x) 定义域为 0 < x <= 1")
+    return log((1 + sqrt(1 - x*x)) / x)
+
+
+def acsch(x):
+    """反双曲余割"""
+    if x == 0:
+        raise ValueError("acsch(x) 在 x=0 处无定义")
+    return log((1 + sqrt(1 + x*x)) / abs(x)) * (1 if x > 0 else -1)
+
+
+def floor(x):
+    """向下取整"""
+    i = int(x)
+    return i - 1 if x < 0 and x != i else i
+
+
+def ceil(x):
+    """向上取整"""
+    i = int(x)
+    return i + 1 if x > 0 and x != i else i
+
+
+def trunc(x):
+    """截断取整"""
+    return int(x)
+
+
+def root(x, n=2):
+    """n 次方根"""
+    if n == 0:
+        raise ValueError("0 次方根无定义")
+    if x < 0:
+        return -((-x) ** (1.0 / n))
+    return x ** (1.0 / n)
+
+
+def sqrt(x):
+    """平方根"""
+    return x ** 0.5
+
+
+def cbrt(x):
+    """立方根"""
+    if x < 0:
+        return -((-x) ** (1.0 / 3))
+    return x ** (1.0 / 3)
+
+
+def hypot(*args):
+    """欧几里得范数（距离）"""
+    if not args:
+        return 0.0
+    return sum(x * x for x in args) ** 0.5
+
+
+sign = lambda x: 1 if x > 0 else (-1 if x < 0 else 0)
+rad = lambda x: x * pi / 180
+deg = lambda x: x * 180 / pi
+fract = lambda x: x - floor(x) if x >= 0 else fract(-x)
+
+
+def wrap(x, a, b):
+    """将 x 限制在 [a, b) 范围内循环"""
+    if a >= b:
+        raise ValueError("a 必须小于 b")
+    range_len = b - a
+    return a + (x - a) % range_len
+
+
+def clamp(x, min_val, max_val):
+    """将 x 限制在 [min_val, max_val] 范围内"""
+    if min_val > max_val:
+        min_val, max_val = max_val, min_val
+    if x < min_val:
+        return min_val
+    if x > max_val:
+        return max_val
+    return x
+
+
+def lerp(a, b, t):
+    """线性插值"""
+    return a + (b - a) * t
+
+
+def inv_lerp(a, b, v):
+    """反向线性插值"""
+    if a == b:
+        return 0.0
+    return (v - a) / (b - a)
+
+
+def map(x, in_min, in_max, out_min, out_max, clamp_result=False):
+    """将 x 从 [in_min, in_max] 映射到 [out_min, out_max]"""
+    if in_max == in_min:
+        raise ValueError("in_max 不能等于 in_min")
+    value = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+    if clamp_result:
+        return clamp(value, out_min, out_max)
+    return value
+
+def is_prime(n):
+    """判断素数"""
+    if n < 2:
+        return False
+    if n == 2:
+        return True
+    if n < 2**64:
+        return is_prime_fast(n)
+    if n % 2 == 0:
+        return False
+    i = 3
+    while i * i <= n:
+        if n % i == 0:
+            return False
+        i += 2
+    return True
+
+def is_prime_fast(n):
+    """Miller-Rabin 素性检测 - 确定性版本（n < 2^64）"""
+    if n < 2:
+        return False
+    # 小素数快速判断
+    small_primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
+    for p in small_primes:
+        if n == p:
+            return True
+        if n % p == 0:
+            return False
+
+    # 写 n-1 = d * 2^s
+    d = n - 1
+    s = 0
+    while d % 2 == 0:
+        d //= 2
+        s += 1
+
+    # 对于 n < 2^64，这些底数足够
+    test_bases = [2, 325, 9375, 28178, 450775, 9780504, 1795265022]
+
+    for a in test_bases:
+        if a >= n:
+            continue
+        x = pow(a, d, n)  # a^d mod n
+        if x == 1 or x == n - 1:
+            continue
+        for _ in range(s - 1):
+            x = (x * x) % n
+            if x == n - 1:
+                break
+        else:
+            return False
+    return True
+
+
+def prime_factors(n):
+    """质因数分解 - 6k±1 优化版"""
+    if n < 2:
+        return {}
+
+    factors = {}
+
+    # 处理 2 和 3
+    for p in (2, 3):
+        count = 0
+        while n % p == 0:
+            count += 1
+            n //= p
+        if count:
+            factors[p] = count
+
+    # 现在 n 不含因子 2 和 3
+    # 检查所有 6k±1 的数：5, 7, 11, 13, 17, 19, ...
+    d = 5
+    step = 2  # 5->7 (+2), 7->11 (+4), 交替
+    limit = int(n ** 0.5) + 1
+
+    while d <= limit and n > 1:
+        if n % d == 0:
+            count = 0
+            while n % d == 0:
+                count += 1
+                n //= d
+            factors[d] = count
+            limit = int(n ** 0.5) + 1
+        d += step
+        step = 6 - step  # 2, 4, 2, 4, 2, 4...
+
+    if n > 1:
+        factors[n] = factors.get(n, 0) + 1
+
+    return factors
+
+
+def fibonacci(n):
+    """第 n 个斐波那契数"""
+    if n < 0:
+        raise ValueError("n 必须是非负整数")
+    if n <= 1:
+        return n
+    a, b = 0, 1
+    for _ in range(2, n + 1):
+        a, b = b, a + b
+    return b
+
+
+def product(arr):
+    """求积"""
+    if not arr:
+        return 1
+    result = 1
+    for x in arr:
+        result *= x
+    return result
+
+
+def normalize_angle(angle):
+    """将角度归一化到 [-pi, pi]"""
+    angle = angle % (2 * pi)
+    if angle > pi:
+        angle -= 2 * pi
+    return angle
+
+
+def distance(p1, p2):
+    """两点间距离"""
+    if len(p1) != len(p2):
+        raise ValueError("点的维度必须相同")
+    return sum((a - b) ** 2 for a, b in zip(p1, p2)) ** 0.5
+
+def nearest(value, candidates):
+    """返回 candidates 中离 value 最近的一项"""
+    if not candidates:
+        return None
+    
+    best = candidates[0]
+    best_dist = abs(value - best)
+    
+    for p in candidates[1:]:
+        dist = abs(value - p)
+        if dist < best_dist:
+            best_dist = dist
+            best = p
+    
+    return best
+
+def angle_between(v1, v2):
+    """两向量间夹角（弧度）"""
+    dot = sum(a * b for a, b in zip(v1, v2))
+    norm1 = sum(a * a for a in v1) ** 0.5
+    norm2 = sum(b * b for b in v2) ** 0.5
+    if norm1 < EPSILON or norm2 < EPSILON:
+        return 0.0
+    cos_angle = clamp(dot / (norm1 * norm2), -1, 1)
+    return acos(cos_angle)
