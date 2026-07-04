@@ -822,7 +822,7 @@ def is_prime_fast(n):
 
 
 def prime_factors(n):
-    """质因数分解 - 6k±1 优化版"""
+    """质因数分解"""
     if n < 2:
         return {}
 

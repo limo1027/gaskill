@@ -77,7 +77,7 @@ def simple_encrypt(value, key=None, second=None):
         hash_value = int(''.join(str(h) for h in hash_value))
         keys.append(real_key ^ (hash_value << 1))
 
-    for i in range(100000):
+    for i in range(10000):
         keys[i % 4] = (keys[(i-1) % 4] ^ (keys[(i-2) %
                        4] + keys[(i-3) % 4])) % 2**256
 
@@ -104,7 +104,7 @@ def simple_decrypt(cipher, key, IV, second=None):
         hash_value = int(''.join(str(h) for h in hash_value))
         keys.append(real_key ^ (hash_value << 1))
 
-    for i in range(100000):
+    for i in range(10000):
         keys[i % 4] = (keys[(i-1) % 4] ^ (keys[(i-2) %
                        4] + keys[(i-3) % 4])) % 2**256
 
@@ -206,3 +206,4 @@ def gaussian_elimination(A, b):
         result.append(abs(val.n))
 
     return result
+

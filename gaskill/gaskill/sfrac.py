@@ -139,6 +139,9 @@ class Frac:
     def __add__(self, other):
         """加法：self + other"""
         other = self._to_frac(other)
+
+        if other is NotImplemented:
+            return NotImplemented
         return Frac(
             self.n * other.d + other.n * self.d,
             self.d * other.d
@@ -147,6 +150,8 @@ class Frac:
     def __sub__(self, other):
         """减法：self - other"""
         other = self._to_frac(other)
+        if other is NotImplemented:
+            return NotImplemented
         return Frac(
             self.n * other.d - other.n * self.d,
             self.d * other.d
@@ -155,11 +160,15 @@ class Frac:
     def __mul__(self, other):
         """乘法：self * other"""
         other = self._to_frac(other)
+        if other is NotImplemented:
+            return NotImplemented
         return Frac(self.n * other.n, self.d * other.d)
 
     def __truediv__(self, other):
         """除法：self / other"""
         other = self._to_frac(other)
+        if other is NotImplemented:
+            return NotImplemented
         if other.n == 0:
             raise ZeroDivisionError("除数不能为0")
         return Frac(self.n * other.d, self.d * other.n)
@@ -174,6 +183,8 @@ class Frac:
     def __lt__(self, other):
         """小于：self < other"""
         other = self._to_frac(other)
+        if other is NotImplemented:
+            return NotImplemented
         # a/b < c/d  <=> a*d < c*b
         return self.n * other.d < other.n * self.d
 
