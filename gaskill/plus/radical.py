@@ -436,6 +436,12 @@ class Radical:
         if self.index == other.index and self.radicand == other.radicand:
             return Radical(1, 1, to_frac(self.coeff) / to_frac(other.coeff))
 
+        # 分子是单项式
+        if not (isinstance(other.radicand, (tuple)) and isinstance(self.radicand, tuple)):
+            n = other ** (other.index - 1) * self
+            d = other.coeff ** other.index * other.radicand
+            return n / d
+
         # 一般情况
         common_idx = self.index * other.index
         r1 = self._pow_radicand(self.radicand, other.index)
