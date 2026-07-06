@@ -312,7 +312,7 @@ def gamma(z):
         return pi / (sin(pi * z) * gamma(1 - z))
 
     if z > 1:
-        return z * gamma(z - 1)
+        return (z - 1) * gamma(z - 1)
 
     coeffs = _lanczos_coefficients()
     g = 7
