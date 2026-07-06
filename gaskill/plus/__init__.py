@@ -4,3 +4,4 @@ from .poly import *
 from .zip import compress, decompress
 from .pickle import *
 from .re import Regex
+from .bmp import *
