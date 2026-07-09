@@ -1,5 +1,7 @@
-from ._roll import parse_dice, roll_dice
-from .smath import ln
+
+import os
+from _roll import parse_dice, roll_dice
+from smath import ln
 
 
 class Random:

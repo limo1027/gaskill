@@ -4,7 +4,7 @@ import subprocess
 import sys
 from pathlib import Path
 long_description = ""
-VERSION = "2.3.3"
+VERSION = "2.4.3"
 
 
 def run(cmd, check=True):
