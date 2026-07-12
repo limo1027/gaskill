@@ -22,3 +22,4 @@ from .snoise import *
 from .scrypt import *
 from .solver import *
 from .sstat import *
+from .sbase64 import *

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-from gaskill import Frac, comb, prime_factors as factorize, superscript
+from gaskill.gaskill.sfrac import Frac
+from gaskill.gaskill.smath import comb, prime_factors as factorize
+from gaskill.gaskill.sformat import superscript
 
 
 class Radical:
@@ -115,10 +117,12 @@ class Radical:
                     if isinstance(item, Radical):
                         if item.coeff == 0:
                             continue
-                        item = Radical(item.index, item.radicand, item.coeff * self.coeff)
+                        item = Radical(item.index, item.radicand,
+                                       item.coeff * self.coeff)
                         if item.index == 1 and isinstance(item.radicand, tuple):
                             for sub in item.radicand:
-                                flat_terms.append(Radical(sub.index, sub.radicand, sub.coeff * self.coeff))
+                                flat_terms.append(
+                                    Radical(sub.index, sub.radicand, sub.coeff * self.coeff))
                             continue
                         flat_terms.append(item)
                     else:
@@ -138,9 +142,8 @@ class Radical:
                         else:
                             groups[0] = term
 
-                new_terms = [v for v in groups.values() if v != 0 and (isinstance(v, Radical) and v.radicand != 0)]
-
-
+                new_terms = [v for v in groups.values() if v != 0 and (
+                    isinstance(v, Radical) and v.radicand != 0)]
 
                 if not new_terms:
                     self.index = 1
@@ -291,7 +294,6 @@ class Radical:
             result.append(product)
         return self._merge_terms(result)
 
-
     def _merge_terms(self, terms):
         if not terms:
             return 0
@@ -420,7 +422,8 @@ class Radical:
                 new_terms = []
                 for term in terms:
                     if isinstance(term, Radical):
-                        new_terms.append(Radical(term.index, term.radicand, to_frac(term.coeff) / to_frac(other.radicand)))
+                        new_terms.append(Radical(term.index, term.radicand, to_frac(
+                            term.coeff) / to_frac(other.radicand)))
                     else:
                         new_terms.append(term / other.radicand)
                 return Radical(1, tuple(new_terms), 1)
@@ -558,7 +561,8 @@ class Radical:
         if self.coeff == 0:
             return 0.0
 
-        coeff_val = float(self.coeff) if isinstance(self.coeff, (int, float, Frac)) else float(self.coeff)
+        coeff_val = float(self.coeff) if isinstance(
+            self.coeff, (int, float, Frac)) else float(self.coeff)
 
         # 计算 radicand 的近似值
         if isinstance(self.radicand, (int, float)):
@@ -580,7 +584,8 @@ class Radical:
 
         # 处理负数
         if rad_val < 0 and self.index % 2 == 0:
-            raise ValueError(f"Cannot take even root of negative number: {rad_val}")
+            raise ValueError(
+                f"Cannot take even root of negative number: {rad_val}")
 
         # 开根号
         if rad_val >= 0:
@@ -593,6 +598,7 @@ class Radical:
     def __float__(self):
         """支持 float() 转换"""
         return self.approx()
+
 
 def real_sqrt(n):
     return Radical(2, n)

@@ -72,7 +72,75 @@ def _is_zero(x, eps=EPSILON):
     return abs(x) < eps
 
 
-# ========== 高阶函数 ==========
+def solve_quartic(a, b, c, d, e):
+    """
+    解 ax^4 + bx^3 + cx^2 + dx + e = 0
+    返回四个复根列表
+    """
+    if abs(a) < EPSILON:
+        # 降级为三次（你的 solve_cubic 应该处理这种情况）
+        return solve_cubic(b, c, d, e)
+
+    # 归一化：x^4 + px^3 + qx^2 + rx + s = 0
+    p = b / a
+    q = c / a
+    r = d / a
+    s = e / a
+
+    # 消去三次项：令 x = y - p/4
+    # 得到 y^4 + P y^2 + Q y + R = 0
+    P = q - (3 * p * p) / 8
+    Q = r - (p * q) / 2 + (p * p * p) / 8
+    R = s - (p * r) / 4 + (p * p * q) / 16 - (3 * p * p * p * p) / 256
+
+    # 特殊情况：Q=0，双二次方程
+    if abs(Q) < EPSILON:
+        # y^4 + P y^2 + R = 0
+        y2_roots = solve_quadratic(1, P, R)
+        roots_y = []
+        for y2 in y2_roots:
+            roots_y.extend(solve_quadratic(1, 0, -y2))
+        return [y - p/4 for y in roots_y]
+
+    # 辅助三次方程：8z^3 - 4P z^2 - 8R z + (4PR - Q^2) = 0
+    A3 = 8.0
+    B3 = -4.0 * P
+    C3 = -8.0 * R
+    D3 = 4.0 * P * R - Q * Q
+
+    z_roots = solve_cubic(A3, B3, C3, D3)
+
+    # 选取合适的 z（使 2z-P ≠ 0）
+    z = z_roots[0]
+    for zz in z_roots:
+        if abs(2 * zz - P) > EPSILON:
+            z = zz
+            break
+
+    denom = 2 * z - P
+    if abs(denom) < EPSILON:
+        # 退化情况：尝试用另一个根
+        for zz in z_roots:
+            if abs(2 * zz - P) > EPSILON:
+                z = zz
+                denom = 2 * z - P
+                break
+        if abs(denom) < EPSILON:
+            # 极端退化，理论上不会发生
+            return []
+
+    sqrt_term = sqrt(denom)  # 你的 sqrt 支持复数
+    coef = Q / denom
+
+    # 两个二次方程：
+    # y^2 + sqrt_term * y + (z - sqrt_term * coef) = 0
+    # y^2 - sqrt_term * y + (z + sqrt_term * coef) = 0
+    roots_y1 = solve_quadratic(1, sqrt_term, z - sqrt_term * coef)
+    roots_y2 = solve_quadratic(1, -sqrt_term, z + sqrt_term * coef)
+
+    all_y = roots_y1 + roots_y2
+    return [y - p/4 for y in all_y]
+
 
 def solve_polynomial(coefficients):
     """自动选择解法"""
@@ -90,6 +158,8 @@ def solve_polynomial(coefficients):
         return solve_quadratic(coefficients[0], coefficients[1], coefficients[2])
     elif n == 3:
         return solve_cubic(coefficients[0], coefficients[1], coefficients[2], coefficients[3])
+    elif n == 4:
+        return solve_quartic(coefficients[0], coefficients[1], coefficients[2], coefficients[3], coefficients[4])
     else:
         raise ValueError(f"不支持 {n} 次方程")
 
@@ -111,7 +181,8 @@ def solve_polynomial_numerical(coefficients, max_iter=1000, tol=1e-10):
         return solve_quadratic(coefficients[0], coefficients[1], coefficients[2])
     elif n == 3:
         return solve_cubic(coefficients[0], coefficients[1], coefficients[2], coefficients[3])
-
+    elif n == 4:
+        return solve_quartic(coefficients[0], coefficients[1], coefficients[2], coefficients[3], coefficients[4])
     # n >= 4，用 Durand-Kerner 数值方法
     roots = []
     for k in range(n):

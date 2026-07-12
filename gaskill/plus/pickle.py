@@ -1,4 +1,4 @@
-from gaskill import ceil
+from gaskill.gaskill.smath import ceil
 
 
 def pack_float(num):

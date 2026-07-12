@@ -1,11 +1,4 @@
-# ============================================================
-# SHA-256 纯 Python 实现（无任何 import）
-# 完全依据 NIST FIPS 180-4 标准
-# ============================================================
 
-# ---------- 1. 预定义常量 ----------
-
-# 8 个初始哈希值（前 8 个质数的平方根小数部分，取 32 位）
 H0 = 0x6a09e667
 H1 = 0xbb67ae85
 H2 = 0x3c6ef372
@@ -15,7 +8,6 @@ H5 = 0x9b05688c
 H6 = 0x1f83d9ab
 H7 = 0x5be0cd19
 
-# 64 个 K 常量（前 64 个质数的立方根小数部分，取 32 位）
 K = [
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
     0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
@@ -27,8 +19,6 @@ K = [
     0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
 ]
 
-
-# ---------- 2. 辅助函数（全部手写） ----------
 
 def rotr(x, n):
     """循环右移 n 位（32-bit）"""
@@ -49,8 +39,6 @@ def add_mod32(a, b):
     """32-bit 加法（自动截断）"""
     return (a + b) & 0xffffffff
 
-
-# ---------- 3. 六个核心逻辑函数 ----------
 
 def ch(x, y, z):
     """Choose: 根据 x 的位选择 y 或 z"""
@@ -82,8 +70,6 @@ def gamma1(x):
     return xor3(rotr(x, 17), rotr(x, 19), shr(x, 10))
 
 
-# ---------- 4. 消息填充 ----------
-
 def pad_message(msg_bytes):
     """
     将字节消息填充为 512-bit 整数倍
@@ -92,25 +78,18 @@ def pad_message(msg_bytes):
     msg_len = len(msg_bytes)
     bit_len = msg_len * 8
 
-    # 复制原始字节
     padded = list(msg_bytes)
 
-    # 追加 0x80（即 1 后跟 7 个 0）
     padded.append(0x80)
 
-    # 追加 0，直到长度 ≡ 56 (mod 64)
-    # 56 字节 = 448 bit，留 8 字节（64 bit）存放长度
     while len(padded) % 64 != 56:
         padded.append(0x00)
 
-    # 追加原始长度（64-bit 大端）
     for i in range(7, -1, -1):
         padded.append((bit_len >> (8 * i)) & 0xff)
 
     return padded
 
-
-# ---------- 5. 将 64 字节块解析为 16 个 32-bit 字 ----------
 
 def bytes_to_words(block):
     """block: 64 字节的 list，返回 16 个 32-bit 整数"""
@@ -122,16 +101,8 @@ def bytes_to_words(block):
     return words
 
 
-# ---------- 6. 核心压缩函数（处理一个 512-bit 块） ----------
-
 def compress_block(block_bytes, h_vals):
-    """
-    处理一个 512-bit 块（64 字节）
-    h_vals: 当前 8 个哈希值 [H0, H1, ..., H7]
-    返回：更新后的 8 个哈希值
-    """
-    # ---- 6a. 消息调度：展开为 64 个 32-bit 字 ----
-    w = bytes_to_words(block_bytes)  # w[0..15]
+    w = bytes_to_words(block_bytes)
 
     for t in range(16, 64):
         w.append(
@@ -141,11 +112,9 @@ def compress_block(block_bytes, h_vals):
             )
         )
 
-    # ---- 6b. 初始化工作变量 ----
     a, b, c, d = h_vals[0], h_vals[1], h_vals[2], h_vals[3]
     e, f, g, h = h_vals[4], h_vals[5], h_vals[6], h_vals[7]
 
-    # ---- 6c. 64 轮主循环 ----
     for t in range(64):
         t1 = add_mod32(
             add_mod32(
@@ -168,7 +137,6 @@ def compress_block(block_bytes, h_vals):
         b = a
         a = add_mod32(t1, t2)
 
-    # ---- 6d. 加和到当前哈希值 ----
     return [
         add_mod32(h_vals[0], a),
         add_mod32(h_vals[1], b),
@@ -180,8 +148,6 @@ def compress_block(block_bytes, h_vals):
         add_mod32(h_vals[7], h),
     ]
 
-
-# ---------- 7. 主 SHA-256 函数 ----------
 
 def sha256(message):
     # 统一转为字节

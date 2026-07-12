@@ -1,6 +1,7 @@
 
 from gaskill.gaskill.sfrac import Frac
 
+
 class Poly:
     """多项式类"""
 
