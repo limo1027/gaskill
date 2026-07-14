@@ -2,9 +2,10 @@ from setuptools import setup, find_packages
 from setuptools import Command
 import subprocess
 import sys
+import os
 from pathlib import Path
 long_description = ""
-VERSION = "2.6.5"
+VERSION = eval(os.getenv('VERSION', '1.0.0'))
 
 
 def run(cmd, check=True):
