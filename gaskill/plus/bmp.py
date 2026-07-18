@@ -1,4 +1,3 @@
-# bmp_reader_writer.py
 # 纯 Python BMP 读写器
 
 from gaskill.plus.pickle import bits_to_bytes, bytes_to_bits, pack_int

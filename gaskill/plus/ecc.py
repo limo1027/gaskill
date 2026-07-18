@@ -8,10 +8,6 @@ from .sha256 import sha256
 from ..gaskill.smath import egcd as mod_inv
 
 
-def mod_inv(a, p):
-    return pow(a, -1, p)
-
-
 class Point:
     def __init__(self, x, y, a, b, p):
         self.x = x
@@ -164,92 +160,3 @@ def ecdsa_verify(public_key, message, signature):
     P = G * u1 + public_key * u2
     return P.x % n == r
 
-
-# ============================================================
-# 用户交互演示
-# ============================================================
-
-def main():
-    print("=" * 60)
-    print("🧾 ECDSA 签名工具 - 用户提供临时私钥 k")
-    print("=" * 60)
-
-    # ---- 用户输入私钥 ----
-    print("\n1️⃣ 请输入你的私钥:")
-    private_key_str = input("  私钥 (整数): ").strip()
-    try:
-        private_key = int(private_key_str)
-        if not is_valid_private_key(private_key):
-            print(f"❌ 私钥必须在 1 ~ {n-1} 之间")
-            return
-    except ValueError:
-        print("❌ 请输入有效的整数")
-        return
-
-    # 计算公钥
-    public_key = G * private_key
-    print(f"  公钥: ({public_key.x}, {public_key.y})")
-
-    # ---- 用户输入消息 ----
-    print("\n2️⃣ 请输入要签名的消息:")
-    message = input("  消息: ").strip()
-    if not message:
-        message = "Hello, ECDSA!"
-        print(f"  使用默认消息: {message}")
-
-    # ---- 用户输入临时私钥 k ----
-    print("\n3️⃣ 请输入临时私钥 k (随机数):")
-    k_str = input("  k (整数): ").strip()
-    try:
-        k = int(k_str)
-        if not is_valid_k(k):
-            print(f"❌ k 必须在 1 ~ {n-1} 之间")
-            return
-    except ValueError:
-        print("❌ 请输入有效的整数")
-        return
-
-    # ---- 签名 ----
-    print("\n4️⃣ 签名中...")
-    try:
-        signature = ecdsa_sign_with_k(private_key, message, k)
-        r, s = signature
-        print(f"\n✅ 签名成功!")
-        print(f"  r = {hex(r)}")
-        print(f"  s = {hex(s)}")
-    except Exception as e:
-        print(f"❌ 签名失败: {e}")
-        return
-
-    # ---- 验签 ----
-    print("\n5️⃣ 验证签名...")
-    valid = ecdsa_verify(public_key, message, signature)
-    if valid:
-        print("✅ 签名有效!")
-    else:
-        print("❌ 签名无效!")
-
-    # ---- 附加演示：用同一个 k 签不同消息 ----
-    print("\n" + "=" * 60)
-    print("🧪 附加实验：用同一个 k 签不同消息")
-    print("=" * 60)
-
-    message2 = input("\n输入另一条消息 (直接回车跳过): ").strip()
-    if message2:
-        sig2 = ecdsa_sign_with_k(private_key, message2, k)
-        valid2 = ecdsa_verify(public_key, message2, sig2)
-        print(f"  第二条消息签名有效? {valid2}")
-
-        print("\n⚠️ 注意: 如果两条消息的 r 相同，说明用了同一个 k")
-        print(f"  签名1 r = {hex(signature[0])}")
-        print(f"  签名2 r = {hex(sig2[0])}")
-        if signature[0] == sig2[0]:
-            print("  ❗ r 相同！这意味着 k 被重复使用了，存在私钥泄露风险！")
-        else:
-            print("  ✅ r 不同，安全")
-
-    print("\n🏁 程序结束")
-
-
-if __name__ == "__main__":
-    main()
