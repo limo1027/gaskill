@@ -11,11 +11,17 @@ INF = float('inf')
 class MathError(BaseException):
     pass
 
-class UndeFinedError(BaseException):
+class UndeFinedError(MathError):
     pass
 
 class Complex:
-    def __init__(self, real, imag):
+    def __init__(self, real, imag=None):
+        if imag is None:
+            result = self._to_Complex(real)
+            self._real = result._real
+            self._imag = result._imag
+            self._update_polar()
+            return
         self._real = real
         self._imag = imag
         self._update_polar()
@@ -109,7 +115,7 @@ class Complex:
             else:
                 return Complex(0, 0)
 
-        log_z = Complex(log(self.r), self.theta)
+        log_z = log(self)
         return exp(other * log_z)
 
     def __abs__(self):
@@ -128,13 +134,28 @@ class Complex:
     def __repr__(self):
         imag = round(self.imag, 12)
         real = round(self.real, 12)
-        if self.real == 0:
+        
+        # 消除 -0.0 和接近 0 的值
+        if abs(real) < EPSILON:
+            real = 0.0
+        if abs(imag) < EPSILON:
+            imag = 0.0
+        
+        if real == 0:
+            if imag == 1:
+                return "i"
+            elif imag == -1:
+                return "-i"
             return f"{imag}i"
-        if self.imag < 0:
+        if imag < 0:
+            if imag == -1:
+                return f"({real}-i)"
             return f"({real}{imag}i)"
-        elif self.imag == 0:
+        elif imag == 0:
             return f"{real}"
         else:
+            if imag == 1:
+                return f"({real}+i)"
             return f"({real}+{imag}i)"
 
     def __str__(self):
@@ -477,37 +498,36 @@ def cos(x):
 
 
 def sin(x):
-    # 输入转成分数
     from . import Frac
     x_frac = Frac(x)
 
-    # 用分数做范围缩减（精确！）
-    # 3.141592653589793 * 2
     pi_frac = Frac(314159265358979323846264,
                    100000000000000000000000)
     two_pi = pi_frac * 2
 
-    x_frac = x_frac % two_pi  # ← Frac.__mod__ 是精确的！
-    # 归一化到 [-pi, pi]
+    # 周期规约到 [-pi, pi]
+    x_frac = x_frac % two_pi
     if x_frac > pi_frac:
         x_frac -= two_pi
     elif x_frac < -pi_frac:
         x_frac += two_pi
 
-    # 泰勒展开全部用分数算（精确！）
+    # 进一步规约到 [-pi/2, pi/2]
+    if x_frac > pi_frac / 2:
+        x_frac = pi_frac - x_frac
+    elif x_frac < -pi_frac / 2:
+        x_frac = -pi_frac - x_frac
+
+    # 现在 x_frac 在 [-pi/2, pi/2]，泰勒展开（14项，到 x^27）
     result = Frac(0, 1)
     term = x_frac
     n = 0
-    while True:
+    for i in range(14):  # 到 x^27，双精度够
         result += term
         term *= -x_frac * x_frac / ((2*n + 2) * (2*n + 3))
         n += 1
-        if abs(float(term)) < EPSILON:
-            break
 
-    # 最后一步才转 float
     return float(result)
-
 
 def tan(x):
     """正切函数"""
@@ -573,7 +593,7 @@ def atan(x):
 def atan2(y, x):
     """双参数反正切"""
     if isinstance(y, Complex) or isinstance(x, Complex):
-        raise UnderFinedError("atan2 不支持复数")
+        raise UndeFinedError("atan2 不支持复数")
     return _atan2(y, x)
 
 
@@ -724,6 +744,10 @@ def root(x, n=2):
 
 def sqrt(x):
     """平方根"""
+    if isinstance(x, complex):
+        x = Complex(x.real, x.imag)
+    elif isinstance(x, (float, int)):
+        x = Complex(x, 0)
     return x ** 0.5
 
 

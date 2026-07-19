@@ -322,10 +322,7 @@ def cymb_to_rgb(c, y, m, k):
 def random_color(rng=None):
     """生成随机颜色"""
     if rng is None:
-        try:
-            from .srandom import Random
-        except ImportError:
-            from srandom import Random
+        from .srandom import Random
         rng = Random()
 
     return (

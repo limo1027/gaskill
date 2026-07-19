@@ -158,8 +158,6 @@ def solve_polynomial(coefficients):
         return solve_quadratic(coefficients[0], coefficients[1], coefficients[2])
     elif n == 3:
         return solve_cubic(coefficients[0], coefficients[1], coefficients[2], coefficients[3])
-    elif n == 4:
-        return solve_quartic(coefficients[0], coefficients[1], coefficients[2], coefficients[3], coefficients[4])
     else:
         raise ValueError(f"不支持 {n} 次方程")
 
@@ -181,8 +179,6 @@ def solve_polynomial_numerical(coefficients, max_iter=1000, tol=1e-10):
         return solve_quadratic(coefficients[0], coefficients[1], coefficients[2])
     elif n == 3:
         return solve_cubic(coefficients[0], coefficients[1], coefficients[2], coefficients[3])
-    elif n == 4:
-        return solve_quartic(coefficients[0], coefficients[1], coefficients[2], coefficients[3], coefficients[4])
     # n >= 4，用 Durand-Kerner 数值方法
     roots = []
     for k in range(n):
