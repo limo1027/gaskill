@@ -1,4 +1,4 @@
-from .sha256 import DJB2
+from .hashlib import DJB2
 class DiskKV:
     def __init__(self, filepath, initial_capacity=1024):
         self.filepath = filepath

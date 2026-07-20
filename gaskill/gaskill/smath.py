@@ -499,10 +499,16 @@ def cos(x):
 
 def sin(x):
     from . import Frac
-    x_frac = Frac(x)
 
-    pi_frac = Frac(314159265358979323846264,
-                   100000000000000000000000)
+    if x > 1000:
+        pi_frac = Frac(314159265358979323846264,
+                    100000000000000000000000)
+        x_frac = Frac(x)
+        result = Frac(0, 1)
+    else:
+        pi_frac = pi
+        x_frac = x
+        result = 0
     two_pi = pi_frac * 2
 
     # 周期规约到 [-pi, pi]
@@ -519,7 +525,6 @@ def sin(x):
         x_frac = -pi_frac - x_frac
 
     # 现在 x_frac 在 [-pi/2, pi/2]，泰勒展开（14项，到 x^27）
-    result = Frac(0, 1)
     term = x_frac
     n = 0
     for i in range(14):  # 到 x^27，双精度够
@@ -747,7 +752,8 @@ def sqrt(x):
     if isinstance(x, complex):
         x = Complex(x.real, x.imag)
     elif isinstance(x, (float, int)):
-        x = Complex(x, 0)
+        if x < 0:
+            x = Complex(x, 0)
     return x ** 0.5
 
 

@@ -4,7 +4,7 @@ ECDSA 签名 - 用户自定义临时私钥 k
 用户提供：私钥、消息、临时私钥 k
 """
 
-from .sha256 import sha256
+from .hashlib import sha256
 from ..gaskill.smath import egcd as mod_inv
 
 
