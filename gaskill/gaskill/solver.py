@@ -233,7 +233,7 @@ def solve_polynomial_numerical(coefficients, max_iter=1000, tol=1e-10):
 
 def roots(coefficients):
     """求根（别名）"""
-    return solve_polynomial(coefficients.copy())
+    return solve_polynomial_numerical(coefficients.copy())
 
 
 def poly(val, coefficients):

@@ -1,3 +1,4 @@
+from .sha256 import DJB2
 class DiskKV:
     def __init__(self, filepath, initial_capacity=1024):
         self.filepath = filepath
@@ -20,14 +21,6 @@ class DiskKV:
         else:
             # 文件存在，扫描统计现有键值对数量
             self._rebuild_count()
-
-    # ---------- 哈希函数 ----------
-    @staticmethod
-    def _hash_str(s, capacity):
-        h = 5381
-        for byte in s.encode('utf-8'):
-            h = ((h * 33) + byte) & 0x7fffffff
-        return h % capacity
 
     # ---------- 文件初始化 ----------
     def _init_file(self):
@@ -84,7 +77,7 @@ class DiskKV:
 
     # ---------- 查找键（返回索引或 -1） ----------
     def _find_key(self, key):
-        start = self._hash_str(key, self.capacity)
+        start = DJB2(key, self.capacity)
         index = start
         while True:
             flag, k, _ = self._read_slot(index)
@@ -98,7 +91,7 @@ class DiskKV:
 
     # ---------- 查找空槽或可复用槽 ----------
     def _find_slot_for_write(self, key):
-        start = self._hash_str(key, self.capacity)
+        start = DJB2(key, self.capacity)
         index = start
         first_deleted = -1
         while True:
