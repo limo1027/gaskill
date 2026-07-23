@@ -9,3 +9,4 @@ from .hashlib import sha256, DJB2 # noqa: F401
 from .ecc import *
 from .decimal import Decimal # noqa: F401
 from .database import DiskKV # noqa: F401
+from .tester import * 

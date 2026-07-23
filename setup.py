@@ -3,9 +3,8 @@ from setuptools import Command
 import subprocess
 import sys
 import os
-from pathlib import Path
 long_description = ""
-VERSION = eval(os.getenv('VERSION', '"2.8.4.post1"'))
+VERSION = eval(os.getenv('VERSION', '"2.9.0"'))
 
 
 def run(cmd, check=True):
@@ -32,17 +31,8 @@ class PublishCommand(Command):
 
     def run(self):
 
-        # 直接找 dist 里已经存在的 whl 文件
-        whl_files = list(Path("dist").glob("*.whl"))
-        gz_files = list(Path("dist").glob("*.gz"))
-        if not whl_files:
-            print("未找到whl文件!")
-        else:  
-            whl_file = max(whl_files, key=lambda p: p.stat().st_mtime)
-            gz_file = max(whl_files, key=lambda p: p.stat().st_mtime)
-            
-            # 上传
-            run(["python", "-m", "twine", "upload", "--verbose", "--disable-progress-bar", "--repository", "testpypi", "--skip-existing", "dist/*", ])
+        # 上传
+        run(["python", "-m", "twine", "upload", "--verbose", "--disable-progress-bar", "--repository", "testpypi", "--skip-existing", "dist/*", ])
             
         # git 提交
         run(["git", "add", "-A", "."])
