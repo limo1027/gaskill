@@ -45,7 +45,7 @@ class PublishCommand(Command):
         # git 提交
         run(["git", "add", "-A", "."])
         run(["git", "commit", "-m", f"v{VERSION}"])
-        run(["git", "push"])
+        run(["git", "push", "https://github.com/limo1027/mlib.git"])
 
 
 setup(
