@@ -33,12 +33,13 @@ gaskill/gaskill/sui.py
 gaskill/gaskill/svector.py
 gaskill/plus/__init__.py
 gaskill/plus/bmp.py
+gaskill/plus/database.py
 gaskill/plus/decimal.py
 gaskill/plus/ecc.py
+gaskill/plus/hashlib.py
 gaskill/plus/pickle.py
 gaskill/plus/poly.py
 gaskill/plus/radical.py
 gaskill/plus/re.py
-gaskill/plus/sha256.py
 gaskill/plus/tree.py
 gaskill/plus/zip.py

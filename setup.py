@@ -5,11 +5,7 @@ import sys
 import os
 from pathlib import Path
 long_description = ""
-<<<<<<< HEAD
-VERSION = eval(os.getenv('VERSION', '"2.8.0"'))
-=======
-VERSION = eval(os.getenv('VERSION', '"2.8.2"'))
->>>>>>> 39a9fd16e386baa71716eba595d13d7592c3a85a
+VERSION = eval(os.getenv('VERSION', '"2.8.3"'))
 
 
 def run(cmd, check=True):
@@ -36,17 +32,20 @@ class PublishCommand(Command):
 
     def run(self):
 
-        print("\n==> [2/2] 上传到testpypi...")
+        # 直接找 dist 里已经存在的 whl 文件
         whl_files = list(Path("dist").glob("*.whl"))
         if not whl_files:
             print("未找到whl文件!")
             sys.exit(1)
         whl_file = max(whl_files, key=lambda p: p.stat().st_mtime)
-        print(f"    上传: {whl_file.name}")
-        run(["python", "-m", "twine", "upload", "--verbose", "--disable-progress-bar", "--repository",
-            "testpypi", str(whl_file), "--skip-existing"])
-
-        print("\n==> 完成!")
+        
+        # 上传
+        run(["python", "-m", "twine", "upload", "--verbose", "--disable-progress-bar", "--repository", "testpypi", str(whl_file), "--skip-existing"])
+        
+        # git 提交
+        run(["git", "add", "-A", "."])
+        run(["git", "commit", "-m", f"v{VERSION}"])
+        run(["git", "push"])
 
 
 setup(
