@@ -178,8 +178,85 @@ class Complex:
         elif isinstance(number, tuple):
             return Complex(number[0], number[1])
 
+        elif isinstance(number, str):
+            try:
+                real, imag = self._parse_complex_str(number)
+                return Complex(real, imag)
+            except ValueError as e:
+                raise TypeError(f"无法从字符串创建复数: {e}")
         raise TypeError(f"Unknown type: {type(number)}")
-
+    
+    def _parse_complex_str(self, s):
+        """解析复数字符串，支持多种格式"""
+        s = s.strip().replace(' ', '')
+        
+        if not s:
+            raise ValueError("空字符串不能解析为复数")
+        
+        # 处理特殊情况
+        if s == 'i':
+            return (0, 1)
+        if s == '-i':
+            return (0, -1)
+        if s == '+i':
+            return (0, 1)
+        
+        # 处理纯实数
+        if s.isdigit() or (s[0] == '-' and s[1:].isdigit()):
+            return (int(s), 0)
+        
+        # 尝试解析浮点数
+        try:
+            if s.replace('.', '').replace('-', '').isdigit():
+                return (float(s), 0)
+        except:
+            pass
+        
+        # 处理 "a+bj" 或 "a+b i" 格式
+        # 找到虚部的位置
+        imag_pos = -1
+        for i, char in enumerate(s):
+            if char in 'ij':
+                imag_pos = i
+                break
+        
+        if imag_pos == -1:
+            # 没有虚部标记，尝试作为实数
+            try:
+                return (float(s), 0)
+            except:
+                raise ValueError(f"无法解析复数字符串: {s}")
+        
+        # 分离实部和虚部
+        real_part = s[:imag_pos]
+        imag_part = s[imag_pos:]
+        
+        # 处理虚部标记
+        imag_part = imag_part.replace('i', '').replace('j', '')
+        
+        # 处理实部
+        if real_part == '' or real_part == '+':
+            real = 0.0
+        elif real_part == '-':
+            real = 0.0
+        else:
+            try:
+                real = float(real_part)
+            except ValueError:
+                raise ValueError(f"无法解析实数部分: {real_part}")
+        
+        # 处理虚部
+        if imag_part == '' or imag_part == '+':
+            imag = 1.0
+        elif imag_part == '-':
+            imag = -1.0
+        else:
+            try:
+                imag = float(imag_part)
+            except ValueError:
+                raise ValueError(f"无法解析虚数部分: {imag_part}")
+        
+        return (real, imag)
 
 def triangle_wave(t, period=1.0, amplitude=1.0, phase=0.0):
     """三角波"""
@@ -741,9 +818,15 @@ def trunc(x):
 def root(x, n=2):
     """n 次方根"""
     if n == 0:
-        raise UnderFinedError("0 次方根无定义")
-    if x < 0:
+        raise UndeFinedError("0 次方根无定义")
+    
+    # 负数的奇数根
+    if isinstance(x, (int, float)) and x < 0 and n % 2 == 1:
         return -((-x) ** (1.0 / n))
+    
+    elif isinstance(x, (complex, Complex)) or n % 2 == 0:
+        x = Complex(x)  # 就这么简单！
+    
     return x ** (1.0 / n)
 
 
