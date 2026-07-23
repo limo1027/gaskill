@@ -5,6 +5,7 @@ from .zip import compress, decompress
 from .pickle import *
 from .re import Regex
 from .bmp import *
-from .sha256 import sha256
+from .hashlib import sha256, DJB2
 from .ecc import *
 from .decimal import Decimal
+from .database import DiskKV

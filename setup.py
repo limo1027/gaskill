@@ -5,7 +5,11 @@ import sys
 import os
 from pathlib import Path
 long_description = ""
+<<<<<<< HEAD
 VERSION = eval(os.getenv('VERSION', '"2.8.0"'))
+=======
+VERSION = eval(os.getenv('VERSION', '"2.8.2"'))
+>>>>>>> 39a9fd16e386baa71716eba595d13d7592c3a85a
 
 
 def run(cmd, check=True):

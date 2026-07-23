@@ -11,11 +11,17 @@ INF = float('inf')
 class MathError(BaseException):
     pass
 
-class UndeFinedError(BaseException):
+class UndeFinedError(MathError):
     pass
 
 class Complex:
-    def __init__(self, real, imag):
+    def __init__(self, real, imag=None):
+        if imag is None:
+            result = self._to_Complex(real)
+            self._real = result._real
+            self._imag = result._imag
+            self._update_polar()
+            return
         self._real = real
         self._imag = imag
         self._update_polar()
@@ -109,7 +115,7 @@ class Complex:
             else:
                 return Complex(0, 0)
 
-        log_z = Complex(log(self.r), self.theta)
+        log_z = log(self)
         return exp(other * log_z)
 
     def __abs__(self):
@@ -128,13 +134,28 @@ class Complex:
     def __repr__(self):
         imag = round(self.imag, 12)
         real = round(self.real, 12)
-        if self.real == 0:
+        
+        # 消除 -0.0 和接近 0 的值
+        if abs(real) < EPSILON:
+            real = 0.0
+        if abs(imag) < EPSILON:
+            imag = 0.0
+        
+        if real == 0:
+            if imag == 1:
+                return "i"
+            elif imag == -1:
+                return "-i"
             return f"{imag}i"
-        if self.imag < 0:
+        if imag < 0:
+            if imag == -1:
+                return f"({real}-i)"
             return f"({real}{imag}i)"
-        elif self.imag == 0:
+        elif imag == 0:
             return f"{real}"
         else:
+            if imag == 1:
+                return f"({real}+i)"
             return f"({real}+{imag}i)"
 
     def __str__(self):
@@ -157,8 +178,79 @@ class Complex:
         elif isinstance(number, tuple):
             return Complex(number[0], number[1])
 
+        elif isinstance(number, str):
+            try:
+                real, imag = self._parse_complex_str(number)
+                return Complex(real, imag)
+            except ValueError as e:
+                raise TypeError(f"无法从字符串创建复数: {e}")
         raise TypeError(f"Unknown type: {type(number)}")
-
+    
+    def _parse_complex_str(self, s):
+        """解析复数字符串"""
+        s = s.strip().replace(' ', '')
+        
+        if not s:
+            raise ValueError("空字符串不能解析为复数")
+        
+        # 特殊值
+        if s in ('i', 'j', '+i', '+j'):
+            return (0, 1)
+        if s in ('-i', '-j'):
+            return (0, -1)
+        
+        # 找到虚部标记
+        imag_pos = -1
+        for i, char in enumerate(s):
+            if char in 'ij':
+                imag_pos = i
+                break
+        
+        if imag_pos == -1:
+            try:
+                return (float(s), 0)
+            except:
+                raise ValueError(f"无法解析复数字符串: {s}")
+        
+        # 🔥 修复：找到最后一个运算符的位置
+        # 从 imag_pos 往前找 '+' 或 '-'
+        op_pos = -1
+        for i in range(imag_pos - 1, -1, -1):
+            if s[i] in '+-':
+                op_pos = i
+                break
+        
+        if op_pos == -1:
+            # 没有运算符，整个字符串就是虚部
+            real = 0.0
+            imag_str = s[:imag_pos]
+        else:
+            real_str = s[:op_pos]
+            imag_str = s[op_pos:imag_pos]
+            
+            # 处理实部
+            if real_str == '' or real_str == '+':
+                real = 0.0
+            elif real_str == '-':
+                real = 0.0
+            else:
+                try:
+                    real = float(real_str)
+                except ValueError:
+                    raise ValueError(f"无法解析实数部分: {real_str}")
+        
+        # 处理虚部系数
+        if imag_str == '' or imag_str == '+':
+            imag = 1.0
+        elif imag_str == '-':
+            imag = -1.0
+        else:
+            try:
+                imag = float(imag_str)
+            except ValueError:
+                raise ValueError(f"无法解析虚数部分: {imag_str}")
+        
+        return (real, imag)
 
 def triangle_wave(t, period=1.0, amplitude=1.0, phase=0.0):
     """三角波"""
@@ -477,37 +569,41 @@ def cos(x):
 
 
 def sin(x):
-    # 输入转成分数
     from . import Frac
-    x_frac = Frac(x)
 
-    # 用分数做范围缩减（精确！）
-    # 3.141592653589793 * 2
-    pi_frac = Frac(314159265358979323846264,
-                   100000000000000000000000)
+    if x > 1000:
+        pi_frac = Frac(314159265358979323846264,
+                    100000000000000000000000)
+        x_frac = Frac(x)
+        result = Frac(0, 1)
+    else:
+        pi_frac = pi
+        x_frac = x
+        result = 0
     two_pi = pi_frac * 2
 
-    x_frac = x_frac % two_pi  # ← Frac.__mod__ 是精确的！
-    # 归一化到 [-pi, pi]
+    # 周期规约到 [-pi, pi]
+    x_frac = x_frac % two_pi
     if x_frac > pi_frac:
         x_frac -= two_pi
     elif x_frac < -pi_frac:
         x_frac += two_pi
 
-    # 泰勒展开全部用分数算（精确！）
-    result = Frac(0, 1)
+    # 进一步规约到 [-pi/2, pi/2]
+    if x_frac > pi_frac / 2:
+        x_frac = pi_frac - x_frac
+    elif x_frac < -pi_frac / 2:
+        x_frac = -pi_frac - x_frac
+
+    # 现在 x_frac 在 [-pi/2, pi/2]，泰勒展开（14项，到 x^27）
     term = x_frac
     n = 0
-    while True:
+    for i in range(14):  # 到 x^27，双精度够
         result += term
         term *= -x_frac * x_frac / ((2*n + 2) * (2*n + 3))
         n += 1
-        if abs(float(term)) < EPSILON:
-            break
 
-    # 最后一步才转 float
     return float(result)
-
 
 def tan(x):
     """正切函数"""
@@ -573,7 +669,7 @@ def atan(x):
 def atan2(y, x):
     """双参数反正切"""
     if isinstance(y, Complex) or isinstance(x, Complex):
-        raise UnderFinedError("atan2 不支持复数")
+        raise UndeFinedError("atan2 不支持复数")
     return _atan2(y, x)
 
 
@@ -716,14 +812,25 @@ def trunc(x):
 def root(x, n=2):
     """n 次方根"""
     if n == 0:
-        raise UnderFinedError("0 次方根无定义")
-    if x < 0:
+        raise UndeFinedError("0 次方根无定义")
+    
+    # 负数的奇数根
+    if isinstance(x, (int, float)) and x < 0 and n % 2 == 1:
         return -((-x) ** (1.0 / n))
+    
+    elif isinstance(x, (complex, Complex)) or n % 2 == 0:
+        x = Complex(x)  # 就这么简单！
+    
     return x ** (1.0 / n)
 
 
 def sqrt(x):
     """平方根"""
+    if isinstance(x, complex):
+        x = Complex(x.real, x.imag)
+    elif isinstance(x, (float, int)):
+        if x < 0:
+            x = Complex(x, 0)
     return x ** 0.5
 
 
