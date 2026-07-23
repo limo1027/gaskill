@@ -367,7 +367,7 @@ class Entry:
 
         if self.focused and self.cursor_pos > 0:
             # 简单滚动：光标保持在可见区域
-            cursor_x = text_x + self.cursor_pos * 8
+            cursor_x = text_x + text_width
             if cursor_x > self.rect.right - padding:
                 visible_start = (
                     cursor_x - (self.rect.right - padding)) // 8 + 1
@@ -395,7 +395,11 @@ class Entry:
         return cmds
 
     def handle_event(self, mouse_pos, keys, dt):
-        """处理事件"""
+        """
+        处理事件
+        mouse_pos: (x, y) 鼠标的坐标(x坐标, y坐标)
+        keys: 一个列表, 表示按下的按键
+        """
         self._time += dt
         self._time = self._time % self.cursor_blink_tim
         if not self.visible:

@@ -1,5 +1,5 @@
 from .smath import floor, sin, cos, pi, sqrt
-from .sinterp import lerp, smoothstep
+from .sinterp import lerp
 from .srandom import Random
 
 class PerlinNoise:
@@ -143,7 +143,6 @@ class SimplexNoise(PerlinNoise):
         else:
             i1, j1 = 0, 1
 
-        i2, j2 = 1, 1
 
         # 三个顶点
         # 顶点 0

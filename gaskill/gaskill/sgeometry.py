@@ -1,6 +1,5 @@
 from .svector import vec2
-# map 可以用来做 clamp
-from .smath import sqrt, sign, map as clamp_value, pi, cos, sin, sqrt, acos, EPSILON
+from .smath import pi, cos, sin, acos, EPSILON, sqrt
 from .scache import memoize
 
 

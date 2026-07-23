@@ -372,9 +372,9 @@ class Frac:
         """将其他类型转换为分数"""
         if isinstance(other, Frac):
             return other
-        if isinstance(other, str) and not "e" in other.lower():
+        if isinstance(other, str) and "e" not in other.lower():
             other = float(other)
-        if isinstance(other, float) and _is_int(other) and not "e" in str(other).lower():
+        if isinstance(other, float) and _is_int(other) and "e" not in str(other).lower():
             return Frac(other, 1)
         if isinstance(other, int):
             return Frac(other, 1)

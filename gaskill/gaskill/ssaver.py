@@ -57,10 +57,10 @@ class SGTsaver:
         else:
             try:
                 return int(s)
-            except:
+            except ValueError:
                 try:
                     return float(s)
-                except:
+                except ValueError:
                     return s
 
     def save(self, filename, use_hash=True):
@@ -72,7 +72,7 @@ class SGTsaver:
             lines.append(f"#{key}={value_str}")
 
         if use_hash:
-            content = "\n".join([l for l in lines if l.startswith('#')])
+            content = "\n".join([line for line in lines if line.startswith('#')])
             hash_value = self.hasher.hash(content)
             if hasattr(hash_value, '__iter__') and not isinstance(hash_value, (str, int)):
                 hash_value = ''.join(str(h) for h in hash_value)
@@ -123,7 +123,7 @@ class SGTsaver:
         if not saved_hash:
             return self.saver_dicts
 
-        content = "\n".join([l for l in hash_lines])
+        content = "\n".join([line for line in hash_lines])
         calc_hash = self.hasher.hash(content)
         calc_hash = ''.join(str(h) for h in calc_hash)
 

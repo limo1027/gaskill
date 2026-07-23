@@ -120,7 +120,7 @@ def ecdsa_sign_with_k(private_key, message, k):
     R = G * k
     r = R.x % n
     if r == 0:
-        raise ValueError(f"r = 0，请换一个 k 值")
+        raise ValueError("r = 0，请换一个 k 值")
     print(f"  R = k*G = ({R.x}, {R.y})")
     print(f"  r = {hex(r)}")
 
@@ -128,7 +128,7 @@ def ecdsa_sign_with_k(private_key, message, k):
     k_inv = mod_inv(k, n)
     s = (z + r * private_key) * k_inv % n
     if s == 0:
-        raise ValueError(f"s = 0，请换一个 k 值")
+        raise ValueError("s = 0，请换一个 k 值")
     print(f"  s = {hex(s)}")
 
     return (r, s)

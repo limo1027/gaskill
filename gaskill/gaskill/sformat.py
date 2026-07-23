@@ -135,7 +135,7 @@ def ordinal(number):
     """数字转序数字符串"""
     try:
         number = int(number)
-    except:
+    except ValueError:
         raise ValueError(f"不支持的类型: {type(number)}")
 
     # 先处理 11,12,13

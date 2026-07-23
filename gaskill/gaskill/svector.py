@@ -102,10 +102,10 @@ class vec2:
 
     def normalize(self):
         """归一化"""
-        l = self.length()
-        if l < EPSILON:
+        length = self.length()
+        if length < EPSILON:
             return vec2(0, 0)
-        return vec2(self.x / l, self.y / l)
+        return vec2(self.x / length, self.y / length)
 
     def normalize_or_zero(self):
         """安全归一化，零向量返回零向量"""
@@ -345,10 +345,10 @@ class vec3:
 
     def normalize(self):
         """归一化"""
-        l = self.length()
-        if l < EPSILON:
+        length = self.length()
+        if length < EPSILON:
             return vec3(0, 0, 0)
-        return vec3(self.x / l, self.y / l, self.z / l)
+        return vec3(self.x / length, self.y / length, self.z / length)
 
     def normalize_or_zero(self):
         """安全归一化"""
@@ -592,10 +592,10 @@ class vec4:
 
     def normalize(self):
         """归一化"""
-        l = self.length()
-        if l < EPSILON:
+        length = self.length()
+        if length < EPSILON:
             return vec4(0, 0, 0, 0)
-        return vec4(self.x / l, self.y / l, self.z / l, self.w / l)
+        return vec4(self.x / length, self.y / length, self.z / length, self.w / length)
 
     def normalize_or_zero(self):
         """安全归一化"""

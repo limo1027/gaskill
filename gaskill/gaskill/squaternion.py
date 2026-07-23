@@ -1,4 +1,4 @@
-from .smath import sqrt, cos, sin, pi, acos, atan2, EPSILON
+from .smath import sqrt, cos, sin, pi, acos, EPSILON
 from .svector import vec3
 from .srandom import Random
 from .smatrix import Matrix

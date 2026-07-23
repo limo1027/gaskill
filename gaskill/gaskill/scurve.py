@@ -1,5 +1,5 @@
 from .svector import vec2, vec3
-from .smath import comb as _comb, EPSILON
+from .smath import EPSILON
 
 
 # ========== 辅助函数 ==========

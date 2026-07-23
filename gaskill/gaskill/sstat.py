@@ -357,10 +357,10 @@ def chi_square(observed, expected):
     if len(observed) != len(expected):
         raise ValueError("观察值和期望值长度必须相同")
     chi2 = 0
-    for obs, exp in zip(observed, expected):
-        if exp == 0:
+    for obs, _exp in zip(observed, expected):
+        if _exp == 0:
             raise ValueError("期望值不能为0")
-        chi2 += (obs - exp) ** 2 / exp
+        chi2 += (obs - _exp) ** 2 / _exp
     return chi2
 
 

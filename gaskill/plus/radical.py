@@ -546,7 +546,7 @@ class Radical:
             return fmt(self.coeff) + "*" + rad_str
 
         rad_str = self._to_str(self.radicand)
-        root = "sqrt" if self.index == 2 else f"root[{self.index}]"
+        root = "√" if self.index == 2 else f"{superscript(self.index)}√"
         if is_one(self.coeff):
             return f"{root}({rad_str})"
         if is_neg_one(self.coeff):

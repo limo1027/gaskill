@@ -214,7 +214,7 @@ class Complex:
         if imag_pos == -1:
             try:
                 return (float(s), 0)
-            except:
+            except ValueError:
                 raise ValueError(f"无法解析复数字符串: {s}")
         
         # 🔥 修复：找到最后一个运算符的位置
@@ -282,7 +282,7 @@ def log_fast(n, base=10):
             if base ** k > n:
                 break
             k *= 2
-        except:
+        except OverflowError:
             break
 
     low, high = k // 2, k
@@ -427,7 +427,7 @@ def gamma(z):
     t = z + g - 0.5
     try:
         return sqrt(2 * pi) * (t ** (z - 0.5)) * exp(-t) * sum_p * mul
-    except OverflowError as e:
+    except OverflowError:
         return float('inf')
 
 
@@ -584,7 +584,7 @@ def sin(x):
             result += term
             term = term * (-x * x / ((2*n + 2) * (2*n + 3)))
             n += 1
-            
+
         return result
     if isinstance(x, (int, float)) and x > 1000:
         pi_frac = Frac(314159265358979323846264,
@@ -624,7 +624,7 @@ def tan(x):
     """正切函数"""
     c = cos(x)
     if abs(c) < EPSILON:
-        raise UnderFinedError("tan(x) 在 x = {:.6f} 处无定义".format(x))
+        raise UndeFinedError("tan(x) 在 x = {:.6f} 处无定义".format(x))
     return sin(x) / c
 
 
@@ -632,7 +632,7 @@ def cot(x):
     """余切函数"""
     s = sin(x)
     if abs(s) < EPSILON:
-        raise UnderFinedError("cot(x) 在 x = {:.6f} 处无定义".format(x))
+        raise UndeFinedError("cot(x) 在 x = {:.6f} 处无定义".format(x))
     return cos(x) / s
 
 
@@ -640,7 +640,7 @@ def sec(x):
     """正割函数"""
     c = cos(x)
     if abs(c) < EPSILON:
-        raise UnderFinedError("sec(x) 在 x = {:.6f} 处无定义".format(x))
+        raise UndeFinedError("sec(x) 在 x = {:.6f} 处无定义".format(x))
     return 1.0 / c
 
 
@@ -648,7 +648,7 @@ def csc(x):
     """余割函数"""
     s = sin(x)
     if abs(s) < EPSILON:
-        raise UnderFinedError("csc(x) 在 x = {:.6f} 处无定义".format(x))
+        raise UndeFinedError("csc(x) 在 x = {:.6f} 处无定义".format(x))
     return 1.0 / s
 
 
@@ -711,7 +711,7 @@ def coth(x):
 def acosh(x):
     """反双曲余弦"""
     if x < 1:
-        raise UnderFinedError("acosh(x) 定义域为 x >= 1")
+        raise UndeFinedError("acosh(x) 定义域为 x >= 1")
     return _ln(x + (x * x - 1) ** 0.5)
 
 
@@ -723,7 +723,7 @@ def asinh(x):
 def atanh(x):
     """反双曲正切"""
     if abs(x) >= 1:
-        raise UnderFinedError("atanh(x) 定义域为 |x| < 1")
+        raise UndeFinedError("atanh(x) 定义域为 |x| < 1")
     return 0.5 * _ln((1 + x) / (1 - x))
 
 
@@ -782,28 +782,28 @@ def sech(x):
 def csch(x):
     """双曲余割 1/sinh(x)"""
     if abs(x) < EPSILON:
-        raise UnderFinedError("csch(x) 在 x=0 处无定义")
+        raise UndeFinedError("csch(x) 在 x=0 处无定义")
     return 1 / sinh(x)
 
 
 def acoth(x):
     """反双曲余切"""
     if abs(x) <= 1:
-        raise UnderFinedError("acoth(x) 定义域为 |x| > 1")
+        raise UndeFinedError("acoth(x) 定义域为 |x| > 1")
     return 0.5 * log((x + 1) / (x - 1))
 
 
 def asech(x):
     """反双曲正割"""
     if not 0 < x <= 1:
-        raise UnderFinedError("asech(x) 定义域为 0 < x <= 1")
+        raise UndeFinedError("asech(x) 定义域为 0 < x <= 1")
     return log((1 + sqrt(1 - x*x)) / x)
 
 
 def acsch(x):
     """反双曲余割"""
     if x == 0:
-        raise UnderFinedError("acsch(x) 在 x=0 处无定义")
+        raise UndeFinedError("acsch(x) 在 x=0 处无定义")
     return log((1 + sqrt(1 + x*x)) / abs(x)) * (1 if x > 0 else -1)
 
 
@@ -872,7 +872,7 @@ def fract(x): return x - floor(x) if x >= 0 else fract(-x)
 def wrap(x, a, b):
     """将 x 限制在 [a, b) 范围内循环"""
     if a >= b:
-        raise UnderFinedError("a 必须小于 b")
+        raise UndeFinedError("a 必须小于 b")
     range_len = b - a
     return a + (x - a) % range_len
 
@@ -903,7 +903,7 @@ def inv_lerp(a, b, v):
 def map(x, in_min, in_max, out_min, out_max, clamp_result=False):
     """将 x 从 [in_min, in_max] 映射到 [out_min, out_max]"""
     if in_max == in_min:
-        raise UnderFinedError("in_max 不能等于 in_min")
+        raise UndeFinedError("in_max 不能等于 in_min")
     value = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
     if clamp_result:
         return clamp(value, out_min, out_max)
@@ -1005,7 +1005,7 @@ def prime_factors(n):
 def fibonacci(n):
     """第 n 个斐波那契数"""
     if n < 0:
-        raise UnderFinedError("n 必须是非负整数")
+        raise UndeFinedError("n 必须是非负整数")
     if n <= 1:
         return n
     a, b = 0, 1
@@ -1035,7 +1035,7 @@ def normalize_angle(angle):
 def distance(p1, p2):
     """两点间距离"""
     if len(p1) != len(p2):
-        raise UnderFinedError("点的维度必须相同")
+        raise UndeFinedError("点的维度必须相同")
     return sum((a - b) ** 2 for a, b in zip(p1, p2)) ** 0.5
 
 
@@ -1070,7 +1070,7 @@ def angle_between(v1, v2):
 def egcd(a, m):
     """计算 a 在模 m 下的乘法逆元"""
     if gcd(a, m) != 1:
-        raise UnderFinedError
+        raise UndeFinedError
     m0 = m
     y = 0
     x = 1

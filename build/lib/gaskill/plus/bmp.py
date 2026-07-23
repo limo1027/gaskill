@@ -1,6 +1,5 @@
 # 纯 Python BMP 读写器
 
-from gaskill.plus.pickle import bits_to_bytes, bytes_to_bits, pack_int
 
 
 class BMPError(Exception):
@@ -159,7 +158,6 @@ class BMPImage:
             header.biYPelsPerMeter = bytes_to_uint32(data, 42)
             header.biClrUsed = bytes_to_uint32(data, 46)
             header.biClrImportant = bytes_to_uint32(data, 50)
-            info_offset = 54
         else:
             raise BMPError(f"不支持的信息头大小: {header.biSize}")
 

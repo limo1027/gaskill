@@ -1,7 +1,3 @@
-
-from gaskill.gaskill.sfrac import Frac
-
-
 class Poly:
     """多项式类"""
 
@@ -343,7 +339,6 @@ class Poly:
         neg_terms = []
 
         for coeff, vars_dict in self.terms:
-            deg = sum(vars_dict.values())
             if coeff > 0:
                 pos_terms.append((coeff, vars_dict))
             elif coeff < 0:
