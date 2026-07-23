@@ -187,33 +187,19 @@ class Complex:
         raise TypeError(f"Unknown type: {type(number)}")
     
     def _parse_complex_str(self, s):
-        """解析复数字符串，支持多种格式"""
+        """解析复数字符串"""
         s = s.strip().replace(' ', '')
         
         if not s:
             raise ValueError("空字符串不能解析为复数")
         
-        # 处理特殊情况
-        if s == 'i':
+        # 特殊值
+        if s in ('i', 'j', '+i', '+j'):
             return (0, 1)
-        if s == '-i':
+        if s in ('-i', '-j'):
             return (0, -1)
-        if s == '+i':
-            return (0, 1)
         
-        # 处理纯实数
-        if s.isdigit() or (s[0] == '-' and s[1:].isdigit()):
-            return (int(s), 0)
-        
-        # 尝试解析浮点数
-        try:
-            if s.replace('.', '').replace('-', '').isdigit():
-                return (float(s), 0)
-        except:
-            pass
-        
-        # 处理 "a+bj" 或 "a+b i" 格式
-        # 找到虚部的位置
+        # 找到虚部标记
         imag_pos = -1
         for i, char in enumerate(s):
             if char in 'ij':
@@ -221,40 +207,48 @@ class Complex:
                 break
         
         if imag_pos == -1:
-            # 没有虚部标记，尝试作为实数
             try:
                 return (float(s), 0)
             except:
                 raise ValueError(f"无法解析复数字符串: {s}")
         
-        # 分离实部和虚部
-        real_part = s[:imag_pos]
-        imag_part = s[imag_pos:]
+        # 🔥 修复：找到最后一个运算符的位置
+        # 从 imag_pos 往前找 '+' 或 '-'
+        op_pos = -1
+        for i in range(imag_pos - 1, -1, -1):
+            if s[i] in '+-':
+                op_pos = i
+                break
         
-        # 处理虚部标记
-        imag_part = imag_part.replace('i', '').replace('j', '')
-        
-        # 处理实部
-        if real_part == '' or real_part == '+':
+        if op_pos == -1:
+            # 没有运算符，整个字符串就是虚部
             real = 0.0
-        elif real_part == '-':
-            real = 0.0
+            imag_str = s[:imag_pos]
         else:
-            try:
-                real = float(real_part)
-            except ValueError:
-                raise ValueError(f"无法解析实数部分: {real_part}")
+            real_str = s[:op_pos]
+            imag_str = s[op_pos:imag_pos]
+            
+            # 处理实部
+            if real_str == '' or real_str == '+':
+                real = 0.0
+            elif real_str == '-':
+                real = 0.0
+            else:
+                try:
+                    real = float(real_str)
+                except ValueError:
+                    raise ValueError(f"无法解析实数部分: {real_str}")
         
-        # 处理虚部
-        if imag_part == '' or imag_part == '+':
+        # 处理虚部系数
+        if imag_str == '' or imag_str == '+':
             imag = 1.0
-        elif imag_part == '-':
+        elif imag_str == '-':
             imag = -1.0
         else:
             try:
-                imag = float(imag_part)
+                imag = float(imag_str)
             except ValueError:
-                raise ValueError(f"无法解析虚数部分: {imag_part}")
+                raise ValueError(f"无法解析虚数部分: {imag_str}")
         
         return (real, imag)
 
