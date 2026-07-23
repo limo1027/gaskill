@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: gaskill
-Version: 2.8.3
+Version: 2.8.4
 Summary: A comprehensive Python library for game development utilities
 Home-page: https://github.com/limo1027/gaskill
 Author: Limo
@@ -14,10 +14,12 @@ Classifier: License :: OSI Approved :: MIT License
 Classifier: Operating System :: OS Independent
 Requires-Python: >=3.6
 Description-Content-Type: text/markdown
+License-File: LICENSE
 Dynamic: author
 Dynamic: author-email
 Dynamic: classifier
 Dynamic: description-content-type
 Dynamic: home-page
+Dynamic: license-file
 Dynamic: requires-python
 Dynamic: summary

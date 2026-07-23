@@ -1,3 +1,4 @@
+LICENSE
 setup.py
 gaskill/__init__.py
 gaskill.egg-info/PKG-INFO
