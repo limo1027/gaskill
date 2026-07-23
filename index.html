@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mlib - 纯 Python 工具箱</title>
+    <style>
+        /* ========== 全局重置 & 字体 ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0d1117;
+            color: #e6edf3;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            padding: 2rem 1.5rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        /* ========== 头部 ========== */
+        .header {
+            text-align: center;
+            padding: 3rem 0 2rem;
+            border-bottom: 1px solid #30363d;
+            margin-bottom: 2.5rem;
+        }
+
+        .logo {
+            font-size: 4rem;
+            font-weight: 800;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, #58a6ff, #f0883e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo span {
+            background: none;
+            -webkit-text-fill-color: #e6edf3;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #8b949e;
+            margin-top: 0.5rem;
+        }
+
+        .badge-row {
+            margin-top: 1.2rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.6rem;
+        }
+
+        .badge {
+            background: #21262d;
+            padding: 0.25rem 0.9rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+        }
+
+        .badge.green {
+            border-color: #2ea043;
+            color: #3fb950;
+        }
+
+        .badge.purple {
+            border-color: #8957e5;
+            color: #d2a8ff;
+        }
+
+        .badge.orange {
+            border-color: #d29922;
+            color: #e3b341;
+        }
+
+        /* ========== 简介卡片 ========== */
+        .hero {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 16px;
+            padding: 2rem 2.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: #c9d1d9;
+        }
+
+        .hero code {
+            background: #0d1117;
+            padding: 0.15rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: #f0883e;
+            border: 1px solid #21262d;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.2rem;
+            margin-top: 1.8rem;
+        }
+
+        .feature-item {
+            background: #0d1117;
+            padding: 1rem 1.2rem;
+            border-radius: 12px;
+            border: 1px solid #21262d;
+            text-align: center;
+        }
+
+        .feature-item .icon {
+            font-size: 1.8rem;
+        }
+        .feature-item .label {
+            font-size: 0.85rem;
+            color: #8b949e;
+            margin-top: 0.3rem;
+        }
+
+        /* ========== 模块列表 ========== */
+        .section-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin: 2.5rem 0 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .section-title .line {
+            flex: 1;
+            height: 1px;
+            background: #30363d;
+        }
+
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .module-card {
+            background: #161b22;
+            border: 1px solid #21262d;
+            border-radius: 12px;
+            padding: 1.2rem 1.5rem;
+            transition: border-color 0.2s, transform 0.15s;
+        }
+
+        .module-card:hover {
+            border-color: #58a6ff;
+            transform: translateY(-2px);
+        }
+
+        .module-card .name {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: #58a6ff;
+        }
+
+        .module-card .desc {
+            font-size: 0.9rem;
+            color: #8b949e;
+            margin-top: 0.3rem;
+        }
+
+        /* ========== 代码示例 ========== */
+        .code-block {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 1.5rem 1.8rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+
+        .code-block .comment {
+            color: #8b949e;
+        }
+        .code-block .keyword {
+            color: #ff7b72;
+        }
+        .code-block .func {
+            color: #d2a8ff;
+        }
+        .code-block .string {
+            color: #a5d6ff;
+        }
+        .code-block .number {
+            color: #f0883e;
+        }
+        .code-block .output {
+            color: #3fb950;
+        }
+
+        /* ========== 安装 ========== */
+        .install-box {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 1.2rem 2rem;
+            margin: 1.5rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        .install-box code {
+            font-size: 1rem;
+            color: #f0e6d0;
+            background: #0d1117;
+            padding: 0.3rem 1rem;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+        }
+
+        .install-box .copy-hint {
+            color: #8b949e;
+            font-size: 0.85rem;
+        }
+
+        /* ========== 页脚 ========== */
+        .footer {
+            margin-top: 3.5rem;
+            padding-top: 2rem;
+            border-top: 1px solid #30363d;
+            text-align: center;
+            color: #8b949e;
+            font-size: 0.85rem;
+        }
+
+        .footer a {
+            color: #58a6ff;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* ========== 响应式 ========== */
+        @media (max-width: 600px) {
+            .logo {
+                font-size: 2.6rem;
+            }
+            .hero {
+                padding: 1.5rem;
+            }
+            .module-grid {
+                grid-template-columns: 1fr;
+            }
+            .install-box {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <!-- ===== 头部 ===== -->
+        <header class="header">
+            <div class="logo">mlib<span>.</span></div>
+            <div class="subtitle">纯 Python · 零依赖 · 瑞士军刀</div>
+            <div class="badge-row">
+                <span class="badge green">🐍 Python 3.8+</span>
+                <span class="badge purple">📦 零外部依赖</span>
+                <span class="badge orange">🧪 300+ 函数</span>
+                <span class="badge">📄 MIT</span>
+            </div>
+        </header>
+
+        <!-- ===== 简介 ===== -->
+        <section class="hero">
+            <p>
+                <strong>mlib</strong> 是一个完全用 <strong>纯 Python</strong> 实现的
+                通用工具库，涵盖数学、几何、加密、数据结构、文件处理、UI 等
+                数十个领域。无需任何第三方依赖，开箱即用。
+            </p>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <div class="icon">🧮</div>
+                    <div class="label">分数 · 复数 · 矩阵 · 四元数</div>
+                </div>
+                <div class="feature-item">
+                    <div class="icon">📐</div>
+                    <div class="label">2D / 3D 几何 · 碰撞 · 寻路</div>
+                </div>
+                <div class="feature-item">
+                    <div class="icon">🔐</div>
+                    <div class="label">SHA-256 · ECDSA · 秘密共享</div>
+                </div>
+                <div class="feature-item">
+                    <div class="icon">🗄️</div>
+                    <div class="label">磁盘 KV · 对象池 · 缓存</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== 代码示例 ===== -->
+        <h2 class="section-title">
+            <span>🚀 快速上手</span>
+            <span class="line"></span>
+        </h2>
+
+        <div class="code-block">
+            <span class="keyword">from</span> gaskill <span class="keyword">import</span> <span class="func">Complex</span>, <span class="func">Frac</span>, <span class="func">vec2</span><br />
+            <br />
+            <span class="comment"># 复数 — 支持字符串解析</span><br />
+            c = <span class="func">Complex</span>(<span class="string">"3+4j"</span>)<br />
+            <span class="func">print</span>(c * c)  <span class="comment"># (-7+24i)</span><br />
+            <br />
+            <span class="comment"># 分数 — 精确有理数</span><br />
+            f = <span class="func">Frac</span>(<span class="number">1</span>, <span class="number">3</span>) + <span class="func">Frac</span>(<span class="number">1</span>, <span class="number">6</span>)<br />
+            <span class="func">print</span>(f)  <span class="comment"># 1/2</span><br />
+            <br />
+            <span class="comment"># 2D 向量 — 几何运算</span><br />
+            v = <span class="func">vec2</span>(<span class="number">3</span>, <span class="number">4</span>)<br />
+            <span class="func">print</span>(v.length())  <span class="comment"># 5.0</span>
+        </div>
+
+        <!-- ===== 安装 ===== -->
+        <h2 class="section-title">
+            <span>📦 安装</span>
+            <span class="line"></span>
+        </h2>
+
+        <div class="install-box">
+            <code>pip install mlib</code>
+            <span class="copy-hint">或直接复制源码到项目中</span>
+        </div>
+
+        <!-- ===== 模块列表 ===== -->
+        <h2 class="section-title">
+            <span>📚 模块总览</span>
+            <span class="line"></span>
+        </h2>
+
+        <div class="module-grid">
+            <div class="module-card">
+                <div class="name">smath</div>
+                <div class="desc">数学核心：复数、素数、伽马函数、三角函数</div>
+            </div>
+            <div class="module-card">
+                <div class="name">sfrac</div>
+                <div class="desc">精确分数运算，支持百分数、LaTeX 输出</div>
+            </div>
+            <div class="module-card">
+                <div class="name">svector / smatrix / squaternion</div>
+                <div class="desc">向量、矩阵、四元数 — 全套线性代数</div>
+            </div>
+            <div class="module-card">
+                <div class="name">sgeometry / sgeometry3d</div>
+                <div class="desc">2D / 3D 碰撞检测、射线、AABB、多边形</div>
+            </div>
+            <div class="module-card">
+                <div class="name">spathfinder</div>
+                <div class="desc">A* · Dijkstra · BFS · 双向搜索 · 迷宫生成</div>
+            </div>
+            <div class="module-card">
+                <div class="name">scrypt</div>
+                <div class="desc">RSA 加解密 · Shamir 秘密共享 · 自定义加密</div>
+            </div>
+            <div class="module-card">
+                <div class="name">hashlib / ecc</div>
+                <div class="desc">SHA-256 · DJB2 · ECDSA 签名 (secp256k1)</div>
+            </div>
+            <div class="module-card">
+                <div class="name">sbase64</div>
+                <div class="desc">Base16/32/64/58/256（中文汉字版）</div>
+            </div>
+            <div class="module-card">
+                <div class="name">scache / spool</div>
+                <div class="desc">LRU/LFU/TTL 缓存 · 对象池 · 环形缓冲区</div>
+            </div>
+            <div class="module-card">
+                <div class="name">sui</div>
+                <div class="desc">轻量 UI 框架：标签、按钮、输入框、进度条</div>
+            </div>
+            <div class="module-card">
+                <div class="name">ssaver / database</div>
+                <div class="desc">SGT 存档器 · 磁盘 KV 数据库（纯 Python）</div>
+            </div>
+            <div class="module-card">
+                <div class="name">snoise / scurve / seasing</div>
+                <div class="desc">Perlin/Simplex 噪声 · 贝塞尔/B样条 · 缓动函数</div>
+            </div>
+            <div class="module-card">
+                <div class="name">sformat / re</div>
+                <div class="desc">表格生成 · 时间/文件大小格式化 · 正则引擎</div>
+            </div>
+            <div class="module-card">
+                <div class="name">poly / radical</div>
+                <div class="desc">多项式因式分解 · 根式化简与四则运算</div>
+            </div>
+            <div class="module-card">
+                <div class="name">bmp / pickle / zip</div>
+                <div class="desc">BMP 读写 · 二进制序列化 · LZ77+哈夫曼压缩</div>
+            </div>
+        </div>
+
+        <!-- ===== 页脚 ===== -->
+        <footer class="footer">
+            <p>
+                <a href="https://github.com/limo1027/mlib" target="_blank">GitHub</a>
+                ·
+                <p>MIT License</p>
+                ·
+                纯 Python · 零依赖 · 只为极客
+            </p>
+            <p style="margin-top:0.4rem; font-size:0.75rem; color:#484f58;">
+                mlib — 不是严肃的库，欢迎 PR
+            </p>
+        </footer>
+
+    </div>
+</body>
+</html>
