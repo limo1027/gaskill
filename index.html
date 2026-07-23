@@ -90,6 +90,11 @@
             color: #e3b341;
         }
 
+        .badge.blue {
+            border-color: #58a6ff;
+            color: #58a6ff;
+        }
+
         /* ========== 简介卡片 ========== */
         .hero {
             background: #161b22;
@@ -292,6 +297,7 @@
                 <span class="badge green">🐍 Python 3.8+</span>
                 <span class="badge purple">📦 零外部依赖</span>
                 <span class="badge orange">🧪 300+ 函数</span>
+                <span class="badge blue">🧰 自带测试框架</span>
                 <span class="badge">📄 MIT</span>
             </div>
         </header>
@@ -302,6 +308,9 @@
                 <strong>mlib</strong> 是一个完全用 <strong>纯 Python</strong> 实现的
                 通用工具库，涵盖数学、几何、加密、数据结构、文件处理、UI 等
                 数十个领域。无需任何第三方依赖，开箱即用。
+            </p>
+            <p style="margin-top: 0.8rem; color: #8b949e; font-size: 0.95rem;">
+                ⚡ 自带 <code>tester</code> 模块 —— 轻量级单元测试框架，零依赖，风格类似 unittest。
             </p>
             <div class="feature-grid">
                 <div class="feature-item">
@@ -317,8 +326,16 @@
                     <div class="label">SHA-256 · ECDSA · 秘密共享</div>
                 </div>
                 <div class="feature-item">
+                    <div class="icon">🧪</div>
+                    <div class="label">自带 tester · 零依赖测试框架</div>
+                </div>
+                <div class="feature-item">
                     <div class="icon">🗄️</div>
                     <div class="label">磁盘 KV · 对象池 · 缓存</div>
+                </div>
+                <div class="feature-item">
+                    <div class="icon">📝</div>
+                    <div class="label">表格生成 · 时间格式化 · 正则引擎</div>
                 </div>
             </div>
         </section>
@@ -331,6 +348,7 @@
 
         <div class="code-block">
             <span class="keyword">from</span> gaskill <span class="keyword">import</span> <span class="func">Complex</span>, <span class="func">Frac</span>, <span class="func">vec2</span><br />
+            <span class="keyword">from</span> gaskill.tester <span class="keyword">import</span> <span class="func">TestCase</span>, <span class="func">test</span>, <span class="func">TestRunner</span><br />
             <br />
             <span class="comment"># 复数 — 支持字符串解析</span><br />
             c = <span class="func">Complex</span>(<span class="string">"3+4j"</span>)<br />
@@ -342,7 +360,15 @@
             <br />
             <span class="comment"># 2D 向量 — 几何运算</span><br />
             v = <span class="func">vec2</span>(<span class="number">3</span>, <span class="number">4</span>)<br />
-            <span class="func">print</span>(v.length())  <span class="comment"># 5.0</span>
+            <span class="func">print</span>(v.length())  <span class="comment"># 5.0</span><br />
+            <br />
+            <span class="comment"># 测试框架 — 零依赖 unittest 风格</span><br />
+            <span class="keyword">class</span> <span class="func">MyTest</span>(TestCase):<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;@<span class="func">test</span><br />
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">def</span> <span class="func">test_add</span>(<span class="keyword">self</span>):<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">self</span>.assert_equal(<span class="number">1</span> + <span class="number">1</span>, <span class="number">2</span>)<br />
+            <br />
+            TestRunner().run_all()
         </div>
 
         <!-- ===== 安装 ===== -->
@@ -423,6 +449,10 @@
                 <div class="name">bmp / pickle / zip</div>
                 <div class="desc">BMP 读写 · 二进制序列化 · LZ77+哈夫曼压缩</div>
             </div>
+            <div class="module-card" style="border-color: #8957e5;">
+                <div class="name" style="color: #d2a8ff;">tester</div>
+                <div class="desc">🧪 轻量级单元测试框架 · 零依赖 · 28 种断言 · unittest 风格</div>
+            </div>
         </div>
 
         <!-- ===== 页脚 ===== -->
@@ -430,7 +460,7 @@
             <p>
                 <a href="https://github.com/limo1027/mlib" target="_blank">GitHub</a>
                 ·
-                <p style="margin-top:0.4rem; font-size:0.75rem; color:#484f58;">MIT License</p>
+                MIT License
                 ·
                 纯 Python · 零依赖 · 只为极客
             </p>
