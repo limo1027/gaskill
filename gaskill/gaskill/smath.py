@@ -94,6 +94,11 @@ class Complex:
     def __rmul__(self, other):
         return self * other
 
+    def __mod__(self, other):
+        if isinstance(other, (Complex, complex)):
+            raise TypeError("unsupported operand type(s) for %: 'complex' and 'complex'")
+        
+        return Complex(self.real % other, self.imag % other)
     def __truediv__(self, other):
         if isinstance(other, (int, float)):
             return Complex(self.real / other, self.imag / other)
@@ -571,7 +576,17 @@ def cos(x):
 def sin(x):
     from . import Frac
 
-    if x > 1000:
+    if isinstance(x, (Complex, complex)):
+        result = 0
+        term = x
+        n = 0
+        for i in range(20):  # 到 x^27，双精度够
+            result += term
+            term = term * (-x * x / ((2*n + 2) * (2*n + 3)))
+            n += 1
+            
+        return result
+    if isinstance(x, (int, float)) and x > 1000:
         pi_frac = Frac(314159265358979323846264,
                     100000000000000000000000)
         x_frac = Frac(x)
