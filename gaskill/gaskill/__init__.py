@@ -1,3 +1,4 @@
+# ruff: noqa: F403
 from .smath import *
 from .sfrac import *
 from .svector import *

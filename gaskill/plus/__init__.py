@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# ruff: noqa: F403
 from .radical import *
 from .poly import *
 from .zip import compress, decompress # noqa: F401

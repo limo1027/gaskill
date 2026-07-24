@@ -12,8 +12,7 @@ class Random:
                 Random._seed_counter = 0
             else:
                 Random._seed_counter = Random._seed_counter + 1
-            seed = id(object()) + id(Random._seed_counter) + \
-                Random._seed_counter
+            seed = id(object()) ^ id([]) ^ id({}) ^ id(()) ^ Random._seed_counter
 
         self.a, self.b, self.c, self.d, self.e, self.f, self.g, self.h, self.i = self.hash(
             seed)

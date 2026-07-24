@@ -1,9 +1,3 @@
-"""
-通用Base系编码模块
-支持: Base16, Base32, Base64, Base64URL, Base58, Base256(中文)
-纯位运算实现，无任何依赖
-"""
-
 # ==================== 字符表 ====================
 
 BASE16_ALPHABET = b"0123456789ABCDEF"
@@ -20,8 +14,8 @@ _BASE256_ALPHABET = ''.join(chr(_BASE256_START + i)
 
 # ==================== Base16 ====================
 
-def b16encode(data: bytes) -> bytes:
-    """Base16编码（十六进制），每4位映射一个字符"""
+def b16encode(data):
+    """Base16编码(十六进制)"""
     result = bytearray()
     for byte in data:
         result.append(BASE16_ALPHABET[byte >> 4])      # 高4位
@@ -29,7 +23,7 @@ def b16encode(data: bytes) -> bytes:
     return bytes(result)
 
 
-def b16decode(data: bytes) -> bytes:
+def b16decode(data):
     """Base16解码"""
     if len(data) % 2 != 0:
         raise ValueError("Base16编码长度必须为偶数")
@@ -47,11 +41,8 @@ def b16decode(data: bytes) -> bytes:
 
 # ==================== Base32 ====================
 
-def b32encode(data: bytes) -> bytes:
-    """
-    Base32编码
-    每5个字节(40位) → 8个字符(每字符5位)
-    """
+def b32encode(data):
+    """Base32编码"""
     if not data:
         return b''
 
@@ -84,7 +75,7 @@ def b32encode(data: bytes) -> bytes:
     return bytes(result)
 
 
-def b32decode(data: bytes) -> bytes:
+def b32decode(data):
     """Base32解码"""
     data = data.rstrip(b'=')
     if not data:
@@ -112,11 +103,8 @@ def b32decode(data: bytes) -> bytes:
 
 # ==================== Base64 ====================
 
-def b64encode(data: bytes) -> bytes:
-    """
-    Base64编码
-    每3个字节(24位) → 4个字符(每字符6位)
-    """
+def b64encode(data):
+    """Base64编码"""
     if not data:
         return b''
 
@@ -147,7 +135,7 @@ def b64encode(data: bytes) -> bytes:
     return bytes(result)
 
 
-def b64decode(data: bytes) -> bytes:
+def b64decode(data):
     """Base64解码"""
     data = data.rstrip(b'=')
     if not data:
@@ -175,13 +163,13 @@ def b64decode(data: bytes) -> bytes:
 
 # ==================== Base64URL ====================
 
-def b64urlencode(data: bytes) -> bytes:
-    """Base64URL编码（URL安全版本，用 - 和 _ 替代 + 和 /）"""
+def b64urlencode(data):
+    """Base64URL编码(URL安全版本,用 - 和 _ 替代 + 和 /)"""
     result = b64encode(data)
     return result.replace(b'+', b'-').replace(b'/', b'_')
 
 
-def b64urldecode(data: bytes) -> bytes:
+def b64urldecode(data):
     """Base64URL解码"""
     data = data.replace(b'-', b'+').replace(b'_', b'/')
     return b64decode(data)
@@ -189,12 +177,8 @@ def b64urldecode(data: bytes) -> bytes:
 
 # ==================== Base58 ====================
 
-def b58encode(data: bytes) -> bytes:
-    """
-    Base58编码（比特币风格）
-    将字节数组视为一个大整数，不断除以58取余
-    去除前导零字节映射为'1'
-    """
+def b58encode(data):
+    """Base58编码"""
     if not data:
         return b''
 
@@ -224,7 +208,7 @@ def b58encode(data: bytes) -> bytes:
     return b'1' * leading_zeros + bytes(result)
 
 
-def b58decode(data: bytes) -> bytes:
+def b58decode(data):
     """Base58解码"""
     if not data:
         return b''
@@ -262,19 +246,15 @@ def b58decode(data: bytes) -> bytes:
 
 # ==================== Base256（中文版） ====================
 
-def b256encode(data: bytes) -> bytes:
-    """
-    Base256编码（中文版）
-    每字节直接映射到Unicode中连续的256个汉字（U+4E00 ~ U+4EFF）
-    结果长度 = 输入长度 × 3（UTF-8编码）
-    """
+def b256encode(data):
+    """Base256编码（中文版）"""
     result = bytearray()
     for byte in data:
         result.extend(_BASE256_ALPHABET[byte * 3:(byte + 1) * 3])
     return bytes(result)
 
 
-def b256decode(data: bytes) -> bytes:
+def b256decode(data):
     """Base256解码（中文版）"""
     if len(data) % 3 != 0:
         raise ValueError("Base256编码长度必须为3的倍数")
